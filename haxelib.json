@@ -5,7 +5,11 @@
 	"dependencies": {
 		"kiss": "",
 		"kiss-tools": "",
-		"flixel": ""
+		"flixel": "",
+		"flixel-addons": "",
+		"flixel-ui": "",
+		"lime": "",
+		"openfl": ""
 	},
 	"url": "https://github.com/NQNStudios/kisslang",
 	"contributors": [
