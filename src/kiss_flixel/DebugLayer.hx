@@ -13,6 +13,16 @@ using kiss_flixel.DebugLayer;
 
 @:build(kiss.Kiss.build())
 class DebugLayer extends FlxTypedGroup<FlxSprite> {
+    var canvas:FlxSprite = null;
+    
+    // Uses a lot of memory and performance for big canvases, but improves performance
+    // when the DebugLayer will have lots of shapes drawn on it
+    public function useCanvas(width:Float, height:Float) {
+        canvas = new FlxSprite();
+        mg(canvas, width, height);
+        add(canvas);
+    }
+
     function thisCamera() {
         if (cameras != null && cameras.length > 0)
             return cameras[0];
@@ -23,26 +33,32 @@ class DebugLayer extends FlxTypedGroup<FlxSprite> {
     }
     public function drawLine(X:Float, Y:Float, X2:Float, Y2:Float, color:FlxColor = FlxColor.WHITE, thickness = 1.0):FlxSprite {
         thickness = _thickness(thickness);
-        var s = new FlxSprite(Math.min(X,X2)-thickness/2, Math.min(Y,Y2)-thickness/2);
-        var Width = Math.abs(X2 - X);
-        var Height = Math.abs(Y2 - Y);
+        var s = canvas;
+        if (s == null) {
+            s = new FlxSprite(Math.min(X,X2)-thickness/2, Math.min(Y,Y2)-thickness/2);
+            var Width = Math.abs(X2 - X);
+            var Height = Math.abs(Y2 - Y);
 
-        // TODO test where thickness appears - is it center-out from the given border?
-        s.mg(Width + thickness, Height + thickness);
+            // TODO test where thickness appears - is it center-out from the given border?
+            s.mg(Width + thickness, Height + thickness);
+            add(s);
+        }
         s.drawLine(X-s.x, Y-s.y, X2-s.x, Y2-s.y, {color: color, thickness: thickness});
-        add(s);
         return s;
     }
 
     public function drawRect(X:Float, Y:Float, Width:Float, Height:Float, outlineColor:FlxColor = FlxColor.WHITE, thickness = 1.0):FlxSprite {
         thickness = _thickness(thickness);
         
-        var s = new FlxSprite(X-thickness/2, Y-thickness/2);
+        var s = canvas;
+        if (s == null) {
+            s = new FlxSprite(X-thickness/2, Y-thickness/2);
+            // TODO test where thickness appears - is it center-out from the given border?
+            s.mg(Width + thickness, Height + thickness);
+            add(s);
+        }
 
-        // TODO test where thickness appears - is it center-out from the given border?
-        s.mg(Width + thickness, Height + thickness);
         s.drawRect(thickness/2, thickness/2, Width, Height, FlxColor.TRANSPARENT, {color: outlineColor, thickness: thickness});
-        add(s);
         return s;
     }
 
@@ -50,13 +66,17 @@ class DebugLayer extends FlxTypedGroup<FlxSprite> {
         return drawRect(rect.x, rect.y, rect.width, rect.height, outlineColor, thickness);
     }
 
+    // TODO
     public function drawCircle(x:Float, y:Float, radius: Float, color = FlxColor.WHITE, thickness = 1.0):FlxSprite {
         thickness = _thickness(thickness);
         
-        var s = new FlxSprite(x - radius - thickness/2, y - radius - thickness/2);
-        s.mg(2 * (radius + thickness), 2 * (radius + thickness));
+        var s = canvas;
+        if (s == null) {
+            s = new FlxSprite(x - radius - thickness/2, y - radius - thickness/2);
+            s.mg(2 * (radius + thickness), 2 * (radius + thickness));
+            add(s);
+        }
         s.drawCircle(s.width / 2, s.height / 2, FlxColor.TRANSPARENT, {color:color, thickness:thickness});
-        add(s);
         return s;
     }
 
