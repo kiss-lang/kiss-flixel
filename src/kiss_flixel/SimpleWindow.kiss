@@ -239,7 +239,7 @@
             (scrollRight)))
 
     (unless _shown
-        (FlxG.cameras.add controlCamera)
+        (FlxG.cameras.add controlCamera false)
         (FlxG.state.add this)
         (FlxG.state.add controls)
         (windowStack.push this)
