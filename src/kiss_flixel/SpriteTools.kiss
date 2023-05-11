@@ -68,6 +68,6 @@
             textHeight flxText.height
             plate (new FlxSprite)]
         (set flxText.color textColor)
-        (plate.makeGraphic (+ (* 2 margin) textWidth) (+ (* 2 margin) textHeight) bgColor)
+        (plate.makeGraphic (+ (* 2 margin) textWidth) (+ (* 2 margin) textHeight) bgColor true)
         (plate.stamp flxText margin margin)
         plate))
