@@ -302,19 +302,19 @@
                 (inputTexts.forEach ->text (set text.hasFocus false))))))
 
 (function :SimpleWindow promptForChoice <>[T] [:String prompt
-                                                    :Array<T> choices
-                                                    :T->Void onChoice
-                                                    &opt :FlxColor bgColor
-                                                    :FlxColor titleColor
-                                                    :FlxColor choiceColor
-                                                    :Float percentWidth
-                                                    :Float percentHeight
-                                                    :Bool xButton
-                                                    :String xKey
-                                                    :String leftKey
-                                                    :String rightKey
-                                                    :ShortcutAction onClose
-                                                    :Bool noShortcuts]
+                                                :Array<T> choices
+                                                :T->Void onChoice
+                                                &opt :FlxColor bgColor
+                                                :FlxColor titleColor
+                                                :FlxColor choiceColor
+                                                :Float percentWidth
+                                                :Float percentHeight
+                                                :Bool xButton
+                                                :String xKey
+                                                :String leftKey
+                                                :String rightKey
+                                                :ShortcutAction onClose
+                                                :Bool noShortcuts]
     (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey onClose)
             choiceColor (or choiceColor titleColor FlxColor.WHITE)]
         (doFor choice choices
@@ -324,6 +324,30 @@
                     (onChoice choice)
                 }
                 noShortcuts))
+        (window.show)
+        window))
+
+(function :SimpleWindow promptForString [:String prompt
+                                            :String->Void onChoice
+                                            &opt :FlxColor bgColor
+                                            :FlxColor titleColor
+                                            :FlxColor submitColor
+                                            :Float percentWidth
+                                            :Float percentHeight
+                                            :Bool xButton
+                                            :String xKey
+                                            :String leftKey
+                                            :String rightKey
+                                            :ShortcutAction onClose]
+    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey onClose)
+            buttonColor (or submitColor FlxColor.WHITE)
+            inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
+        (window.addControl inputText)
+        (window.makeText "{enter} Submit" buttonColor
+            ->:Void s {
+                (window.hide)
+                (onChoice inputText.text)
+            })
         (window.show)
         window))
 
