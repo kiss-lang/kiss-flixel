@@ -118,9 +118,9 @@
     (let [columnControls (controls.members.slice (if title 1 0))]
         // Don't count special controls as part of any column:
         (doFor c [xText leftText rightText]
-            (when c (columnControls.remove c true)))
+            (when c (columnControls.remove c)))
         (doFor c columnTexts
-            (when c (columnControls.remove c true)))
+            (when c (columnControls.remove c)))
 
         (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
         (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
