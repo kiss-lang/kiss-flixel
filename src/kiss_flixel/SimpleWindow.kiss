@@ -118,9 +118,9 @@
     (let [columnControls (controls.members.slice (if title 1 0))]
         // Don't count special controls as part of any column:
         (doFor c [xText leftText rightText]
-            (when c (columnControls.remove c)))
+            (when c (columnControls.remove c true)))
         (doFor c columnTexts
-            (when c (columnControls.remove c)))
+            (when c (columnControls.remove c true)))
 
         (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
         (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
@@ -250,8 +250,8 @@
 (method :Void hide []
     (when _shown
         (FlxG.cameras.remove controlCamera false)
-        (FlxG.state.remove this)
-        (FlxG.state.remove controls)
+        (FlxG.state.remove this true)
+        (FlxG.state.remove controls true)
         (windowStack.remove this)
         (keyHandler.cancel)
         (xHandler.cancel)
@@ -355,7 +355,7 @@
     (when (> cameraColumn 0)
         (-= cameraColumn 1)
         (when (= cameraColumn 0)
-            (controls.remove leftText))
+            (controls.remove leftText true))
         (controls.add rightText)
         (let [scrollAmount (nth columnWidths cameraColumn)]
             (-= controlCamera.scroll.x scrollAmount)
@@ -383,7 +383,7 @@
                 (+= xText.x scrollAmount)))
         (+= cameraColumn 1)
         (when (< (apply + (columnWidths.slice cameraColumn)) width)
-            (controls.remove rightText))
+            (controls.remove rightText true))
         (controls.add leftText)
         (refreshColumnTexts)))
 
