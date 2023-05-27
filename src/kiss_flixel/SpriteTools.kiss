@@ -71,3 +71,22 @@
         (plate.makeGraphic (+ (* 2 margin) textWidth) (+ (* 2 margin) textHeight) bgColor true)
         (plate.stamp flxText margin margin)
         plate))
+
+(var &mut _idx 0)
+(function :Void logSprites [&opt :FlxGroup group :String tab]
+    (unless group
+        (print "Logging Sprites")
+        (print "###############")
+        (set _idx 0)
+        (set group FlxG.state)
+        (set tab ""))
+    (group.forEach
+        ->:Void obj 
+            (typeCase [obj]
+                ([:FlxSprite sprite]
+                    (print "${tab}${_idx++}. ${sprite}"))
+                ([:FlxTypedGroup<FlxBasic> innerGroup]
+                    (logSprites innerGroup "${tab}|   "))
+                (otherwise
+                    (print "${tab}${_idx++}. Unknown type"))))
+    (print "${tab}---------------"))
