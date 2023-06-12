@@ -9,9 +9,6 @@
 
 (prop &mut keyboardEnabled true)
 
-// TODO tooltip support with left-click and right-click action
-// icons and explanations?
-
 (defNew [&opt :String _title 
             :FlxColor bgColor
             :FlxColor _textColor
@@ -36,14 +33,16 @@
         :FlxKeyShortcutHandler<ShortcutAction> keyHandler (new FlxKeyShortcutHandler)
         // The xHandler exists so that when keyboard shortcuts are disabled,
         // UI key controls are still available. it also handles left and right.
-        :FlxKeyShortcutHandler<ShortcutAction> xHandler (new FlxKeyShortcutHandler)]
+        :FlxKeyShortcutHandler<ShortcutAction> xHandler (new FlxKeyShortcutHandler)
+        :Int _width (Std.int (* FlxG.width (or percentWidth 0.5)))
+        :Int _height (Std.int (* FlxG.height (or percentHeight 0.5)))]
     
     (assert FlxG.camera "SimpleWindow.new() must be called in or after create()")
     (super 0 0)
     (when defaultCamera (set this.cameras [defaultCamera]))
     (makeGraphic
-        (Std.int (* FlxG.width (or percentWidth 0.5)))
-        (Std.int (* FlxG.height (or percentHeight 0.5)))
+        _width
+        _height
         (or bgColor FlxColor.BLACK))
     (screenCenter)
     
@@ -66,9 +65,7 @@
     (set keyHandler.onBadKey ->:Void [key context]
         (unless (= key xKey)
             (#when debug
-                (print "bad key $key in context $context"))
-            // TODO do SOMETHING like visual/audio bell, cancel and restart
-            ))
+                (print "bad key $key in context $context"))))
     (set keyHandler.onSelectItem
         ->:Void [:ShortcutAction a] {
             (a)
@@ -98,10 +95,7 @@
                 (when xKey
                     (when (= keyHandler.cancelKey xKey)
                         (set keyHandler.cancelKey null))
-                    (xHandler.registerItem "{${xKey}}" closeAction true))))
-        
-    // TODO show which shortcuts' prefixes are partially highlighted?
-    )
+                    (xHandler.registerItem "{${xKey}}" closeAction true)))))
 
 (prop :FlxTypedGroup<KissInputText> inputTexts (new FlxTypedGroup))
 
@@ -115,28 +109,89 @@
     (controls.add control)
     (+= nextControlY control.height)
     // TODO controls that aren't the same height as text will be able to vertically overflow
-    (let [columnControls (controls.members.slice (if title 1 0))]
-        // Don't count special controls as part of any column:
-        (doFor c [xText leftText rightText]
-            (when c (columnControls.remove c)))
-        (doFor c columnTexts
-            (when c (columnControls.remove c)))
+    (unless _useScrolling
+        (let [columnControls (controls.members.slice (if title 1 0))]
+            // Don't count special controls as part of any column:
+            (doFor c [xText leftText rightText]
+                (when c (columnControls.remove c)))
+            (doFor c columnTexts
+                (when c (columnControls.remove c)))
 
-        (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
-        (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
-            (set nextControlY 0)
-            (when title (+= nextControlY control.height))
-            (+= nextControlX (last columnWidths))
-            (columnWidths.push 0)
-            (when (> (apply + columnWidths) width)
-                (makeScrollArrows))))
+            (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
+            (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
+                (set nextControlY 0)
+                (when title (+= nextControlY control.height))
+                (+= nextControlX (last columnWidths))
+                (columnWidths.push 0)
+                (when (> (apply + columnWidths) width)
+                    (makeScrollArrows)))))
     control)
+
+(prop &mut :Bool _useScrolling false)
+(method enableVerticalScrolling [&opt :String upKey :String downKey]
+    (set _useScrolling true)
+    // add scroll up/scroll down buttons
+    (assert xText)
+    (set upText (new FlxText xText.x (+ xText.y xText.height) 0 "v" textSize))
+    (set upText.color textColor)
+    (set upText.flipY true)
+    (dictSet _colors upText upText.color)
+    (dictSet _actions upText ->:Void _ (scrollUp))
+    (set upText.cameras [controlCamera])
+    (controls.add upText)
+
+    (set downText (upText.clone))
+    (dictSet _colors downText upText.color)
+    (dictSet _actions downText ->:Void _ (scrollDown))
+    (set downText.cameras [controlCamera])
+    (set downText.flipY false)
+    (set downText.x upText.x)
+    (set downText.y (- _height downText.height))
+    (controls.add downText)
+    
+    // register upKey/downKey
+    (when upKey
+        (xHandler.registerItem "{${upKey}}" scrollUp true))
+    (when downKey
+        (xHandler.registerItem "{${downKey}}" scrollDown true)))
+
+(method :Bool scrollDown []
+    (let [:kiss.List<FlxSprite> controls (_nonUIControls)]
+        (when (< .y (last controls) _height)
+            (return false))
+        (doFor c controls
+            (-= c.y c.height)
+            (set c.visible !?(= c.y titleText?.y)))
+        true))
+
+(method :Bool scrollUp []
+    (let [:kiss.List<FlxSprite> controls (_nonUIControls)
+            minY (if titleText titleText.height 0)]
+        (when (>= .y (first controls) minY)
+            (return false))
+        (doFor c controls
+            (+= c.y c.height)
+            (set c.visible !?(= c.y titleText?.y)))
+        true))
+
+(method scrollToBottom []
+    (assert _useScrolling)
+    
+    (while (scrollDown)
+        null))
+
+(method _nonUIControls []
+    (filter controls.members ->m ?(when (= -1 (.indexOf [xText upText downText titleText] (cast m))) m)))
 
 (prop &mut :FlxText titleText)
 (prop &mut :FlxText leftText)
 (prop &mut :FlxText rightText)
 (prop &mut :Array<FlxText> columnTexts [])
 (prop &mut :FlxText xText)
+
+// These are only for vertically scrolling SimpleWindows 
+(prop &mut :FlxText upText)
+(prop &mut :FlxSprite downText)
 
 (method columnTextStr [:Int column]
     (if (= cameraColumn column) ">${column}<" "$column"))
@@ -202,12 +257,31 @@
         (addControl ftext)
         (when onClick
             (dictSet _actions ftext onClick)
-            // TODO right click?
             (unless noShortcut
                 (keyHandler.registerItem text ->:Void (onClick ftext))))
         ftext))
 
-// TODO makeButton
+(method makeWrappedText [:String _text &opt :FlxColor color]
+    (assert _useScrolling)
+    (let [text (new FlxText nextControlX nextControlY 0 _text textSize)
+            maxWidth (- _width nextControlX)]
+        (set text.color (or color textColor))
+        (cond
+            ((> text.width maxWidth)
+                (let [tokens (_text.split " ")
+                        nextLineTokens []]
+                    (until (< text.width maxWidth)
+                        (nextLineTokens.unshift (tokens.pop))
+                        (set text.text (tokens.join " ")))
+                    (addControl text)
+                    (makeWrappedText (nextLineTokens.join " "))))
+            (true
+                (addControl text)))))
+
+(method makeMultilineText [:String text &opt :FlxColor color]
+    (doFor line (text.split "\n")
+        (makeWrappedText line color)))
+
 // TODO make inputText
 
 (prop &mut _shown false)
@@ -273,6 +347,12 @@
             (unless (apply or (for textBox inputTexts.members textBox.hasFocus))
                 (keyHandler.update)))
         (xHandler.update)
+        
+        // Scroll wheel scroll up/down
+        (when _useScrolling
+            // TODO move all controls other than xButton and scrollbar. Clamp movement by top and bottom of all controls 
+            null)
+
         // Handle mouse input
         (let [mousePos (FlxG.mouse.getScreenPosition controlCamera)]
             // Click and hover on clickable text entries
