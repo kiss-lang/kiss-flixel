@@ -155,7 +155,11 @@
     (when downKey
         (xHandler.registerItem "{${downKey}}" scrollDown true)))
 
+(var SCROLL_LINES 3)
 (method :Bool scrollDown []
+    (apply or (for _ (range SCROLL_LINES) (_scrollDown))))
+
+(method :Bool _scrollDown []
     (let [:kiss.List<FlxSprite> controls (_nonUIControls)]
         (when (< .y (last controls) _height)
             (return false))
@@ -164,7 +168,7 @@
             (set c.visible !?(= c.y titleText?.y)))
         true))
 
-(method :Bool scrollUp []
+(method :Bool _scrollUp []
     (let [:kiss.List<FlxSprite> controls (_nonUIControls)
             minY (if titleText titleText.height 0)]
         (when (>= .y (first controls) minY)
@@ -173,11 +177,13 @@
             (+= c.y c.height)
             (set c.visible !?(= c.y titleText?.y)))
         true))
+(method :Bool scrollUp []
+    (apply or (for _ (range SCROLL_LINES) (_scrollUp))))
 
 (method scrollToBottom []
     (assert _useScrolling)
     
-    (while (scrollDown)
+    (while (_scrollDown)
         null))
 
 (method _nonUIControls []
