@@ -41,13 +41,15 @@
             (stamp.origin.set oX oY))))
 
 // TODO allow specifying size relative to canvas
-(function :Void writeOnSprite [:String text :Int size :FlxSprite canvas :RelativePosition pos &opt :FlxColor color]
+(function :Void writeOnSprite [:String text :Int size :FlxSprite canvas :RelativePosition pos &opt :FlxColor color :String fontPath]
     (let [lines (text.split "\n")
             &mut offsetY (/ (* size lines.length) -2)]
         (doFor text lines
             (set pos.offsetY offsetY)
             (+= offsetY size)
             (let [text (new FlxText 0 0 0 text size)]
+                (when fontPath
+                    (text.setFormat fontPath size color))
                 (when color
                     (set text.color color))
                 (drawOnSprite text canvas pos)))))
