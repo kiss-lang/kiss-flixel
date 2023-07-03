@@ -99,32 +99,40 @@
 
 (prop :FlxTypedGroup<KissInputText> inputTexts (new FlxTypedGroup))
 
-(method addControl [:FlxSprite control]
+(prop &mut :Array<FlxSprite> nonLayoutControls [])
+
+(method addControl [:FlxSprite control &opt :Bool ignoreLayout]
+    (when ?ignoreLayout
+        (nonLayoutControls.push control))
 
     (when (Std.isOfType control KissInputText)
         (inputTexts.add (cast control KissInputText)))
     (set control.cameras [controlCamera])
-    (set control.x nextControlX)
-    (set control.y nextControlY)
     (controls.add control)
-    (+= nextControlY control.height)
-    // TODO controls that aren't the same height as text will be able to vertically overflow
-    (unless _useScrolling
-        (let [columnControls (controls.members.slice (if title 1 0))]
-            // Don't count special controls as part of any column:
-            (doFor c [xText leftText rightText]
-                (when c (columnControls.remove c)))
-            (doFor c columnTexts
-                (when c (columnControls.remove c)))
+    
+    (unless ?ignoreLayout
+        (set control.x nextControlX)
+        (set control.y nextControlY)
+        (+= nextControlY control.height)
+        // TODO controls that aren't the same height as text will be able to vertically overflow
+        (unless _useScrolling
+            (let [columnControls (controls.members.slice (if title 1 0))]
+                // Don't count special controls as part of any column:
+                (doFor c [xText leftText rightText]
+                    (when c (columnControls.remove c)))
+                (doFor c columnTexts
+                    (when c (columnControls.remove c)))
+                (doFor c nonLayoutControls
+                    (when c (columnControls.remove c)))
 
-            (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
-            (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
-                (set nextControlY 0)
-                (when title (+= nextControlY control.height))
-                (+= nextControlX (last columnWidths))
-                (columnWidths.push 0)
-                (when (> (apply + columnWidths) width)
-                    (makeScrollArrows)))))
+                (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
+                (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
+                    (set nextControlY 0)
+                    (when title (+= nextControlY control.height))
+                    (+= nextControlX (last columnWidths))
+                    (columnWidths.push 0)
+                    (when (> (apply + columnWidths) width)
+                        (makeScrollArrows))))))
     control)
 
 (prop &mut :Bool _useScrolling false)
@@ -308,6 +316,7 @@
     (makeXControls)
     (set nextControlX 0)
     (set nextControlY 0)
+    (set nonLayoutControls [])
     (set titleText (makeText title titleColor)))
 
 (method :Void show [&opt :Int _cameraColumn]
