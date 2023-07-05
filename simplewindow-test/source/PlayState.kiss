@@ -1,0 +1,23 @@
+(import flixel.FlxState)
+(import kiss_flixel.SimpleWindow)
+(extends FlxState)
+
+(method &override :Void create []
+    (super.create)
+    (showMenu)
+    )
+
+(method showMenu []
+    (SimpleWindow.promptForChoice "Testing SimpleWindow" ["Vertical" "Menu" "Quit"]
+        ->:Void choice 
+            (case choice
+                ("Vertical"
+                    null)
+                ("Menu"
+                    null)
+                ("Quit"
+                    (Sys.exit 0))
+                (never otherwise))))
+
+(method &override :Void update [:Float elapsed]
+    (super.update elapsed))
