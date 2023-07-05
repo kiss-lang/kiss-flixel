@@ -1,6 +1,6 @@
 #if flixel
 
-package kiss_tools;
+package kiss_flixel;
 
 import kiss.Prelude;
 import kiss.List;

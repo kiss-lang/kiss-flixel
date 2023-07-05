@@ -10,7 +10,7 @@ import flixel.text.FlxText;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.group.FlxGroup;
-import kiss_tools.FlxKeyShortcutHandler;
+import kiss_flixel.FlxKeyShortcutHandler;
 
 typedef ShortcutAction = Void->Void;
 typedef Action = FlxSprite->Void;
