@@ -507,10 +507,11 @@
             choiceColor (or choiceColor titleColor FlxColor.WHITE)]
         (doFor choice choices
             (window.makeText (Std.string choice) choiceColor
-                ->:Void s {
-                    (window.hide)
-                    (onChoice choice)
-                }
+                (when (Std.string choice)
+                    ->:Void s {
+                        (window.hide)
+                        (onChoice choice)
+                    })
                 noShortcuts))
         (window.show)
         window))
