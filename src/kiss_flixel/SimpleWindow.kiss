@@ -496,3 +496,23 @@
  // Irreversibly disable the window's buttons (for when you're going to hide it in the next frame)
 (method clearActions []
     (_actions.clear))
+
+(method enableGamepadInput [:Bool addDefaultUIInputs &opt :Map<FlxGamepadInputID,String> uiKeyMappings :Map<FlxGamepadInputID,String> otherKeyMappings :Int gamepadId]
+    (unless uiKeyMappings (set uiKeyMappings (new Map)))
+    (localVar DEFAULT_UI_INPUTS [
+        =>xKey [B]
+        =>leftKey [DPAD_LEFT LEFT_STICK_DIGITAL_LEFT]
+        =>rightKey [DPAD_RIGHT LEFT_STICK_DIGITAL_RIGHT]
+        =>upKey [DPAD_UP LEFT_STICK_DIGITAL_UP]
+        =>downKey [DPAD_DOWN LEFT_STICK_DIGITAL_DOWN]
+        =>enterKey [A START]
+    ])
+    (when addDefaultUIInputs
+        (doFor key [xKey leftKey rightKey upKey downKey enterKey]
+            (whenLet [key key buttons (dictGet DEFAULT_UI_INPUTS key)]
+                (doFor button buttons
+                    (dictSet uiKeyMappings button key)))))
+    (xHandler.enableGamepadInput uiKeyMappings gamepadId)
+    (when otherKeyMappings
+        (keyHandler.enableGamepadInput otherKeyMappings gamepadId))
+    this)

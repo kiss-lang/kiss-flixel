@@ -11,6 +11,10 @@ import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.group.FlxGroup;
 import kiss_flixel.FlxKeyShortcutHandler;
+import flixel.input.actions.FlxAction;
+import flixel.input.actions.FlxActionInput;
+import flixel.input.FlxInput;
+import flixel.input.gamepad.FlxGamepadInputID;
 
 typedef ShortcutAction = Void->Void;
 typedef Action = FlxSprite->Void;

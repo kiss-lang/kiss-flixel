@@ -14,10 +14,21 @@
                 ("Vertical"
                     null)
                 ("Menu"
-                    null)
+                    (subMenu))
                 ("Quit"
                     (Sys.exit 0))
                 (never otherwise))))
+
+(method subMenu []
+    (.enableGamepadInput
+        (SimpleWindow.promptForChoice "SubMenu" ["A" "B" "C" "{tab} Back"]
+            ->:Void choice 
+                (case choice
+                    ("{tab} Back" (showMenu))
+                    (never otherwise)))
+        true
+        null
+        [=>B "tab"]))
 
 (method &override :Void update [:Float elapsed]
     (super.update elapsed))
