@@ -28,8 +28,24 @@
     // TODO generic error handlers
     )
 
-// automatically pass the last pressed key to handle key
+(prop &mut :Array<FlxActionDigital> buttonActions [])
+(method enableGamepadInput [:Map<FlxGamepadInputID,String> buttonToKeyMappings &opt :Int gamepadId]
+    (unless gamepadId (set gamepadId FlxInputDeviceID.ALL))
+    (set buttonActions
+        (for =>buttonId keyString buttonToKeyMappings
+            (.addGamepad
+                (new FlxActionDigital
+                    "${buttonId}->${keyString}"
+                    ->:Void _ (handleKey keyString))
+                buttonId
+                JUST_PRESSED 
+                gamepadId))))
+
 (method :Void update []
+    (doFor action buttonActions
+        (action.update))
+
+    // automatically pass the last pressed key to super.handleKey
     (let [:FlxKey id (FlxG.keys.firstJustPressed)]
         (unless (= id -1)
             (let [key (id.toString)]
