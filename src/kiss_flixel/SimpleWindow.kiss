@@ -16,6 +16,8 @@
             :Float percentHeight
             :Bool _xButton :String _xKey
             :String _leftKey :String _rightKey
+            :String _upKey :String _downKey
+            :String _enterKey
             :ShortcutAction _onClose]
     
     [:String title (or _title "")
@@ -28,6 +30,9 @@
         :String xKey _xKey
         :String leftKey _leftKey
         :String rightKey _rightKey
+        :String upKey _upKey
+        :String downKey _downKey
+        :String enterKey _enterKey
         :ShortcutAction onClose _onClose
         :FlxTypedGroup<FlxSprite> controls (new FlxTypedGroup)
         :FlxKeyShortcutHandler<ShortcutAction> keyHandler (new FlxKeyShortcutHandler)
@@ -408,9 +413,12 @@
                                                 :String xKey
                                                 :String leftKey
                                                 :String rightKey
+                                                :String upKey
+                                                :String downKey
+                                                :String enterKey
                                                 :ShortcutAction onClose
                                                 :Bool noShortcuts]
-    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey onClose)
+    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
             choiceColor (or choiceColor titleColor FlxColor.WHITE)]
         (doFor choice choices
             (window.makeText (Std.string choice) choiceColor
@@ -433,8 +441,11 @@
                                             :String xKey
                                             :String leftKey
                                             :String rightKey
+                                            :String upKey
+                                            :String downKey
+                                            :String enterKey
                                             :ShortcutAction onClose]
-    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey onClose)
+    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
             buttonColor (or submitColor FlxColor.WHITE)
             inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
         (window.addControl inputText)
