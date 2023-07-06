@@ -20,7 +20,7 @@
                 (never otherwise))))
 
 (method subMenu []
-    (let [window (new SimpleWindow "SubMenu")]
+    (let [window (new SimpleWindow "SubMenu" null null null null "escape" "left" "right" "up" "down" "enter")]
         (doFor letter ["A" "B" "C"]
             (window.makeText letter null
                 ->_ (print "$letter clicked")

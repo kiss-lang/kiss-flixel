@@ -42,6 +42,26 @@
             (otherwise))
         value))
 
+(method selectDown []
+    (let [columnControls (getColumnControls)
+            &mut nextIndex _selectedIndex]
+        (loop
+            (set nextIndex (% (+ 1 nextIndex) columnControls.length))
+            (when (or (dictGet _actions (nth columnControls nextIndex)) (Std.isOfType (nth columnControls nextIndex) KissInputText))
+                (set selectedIndex nextIndex)
+                (return)))))
+
+(method selectUp []
+    (let [columnControls (getColumnControls)
+            &mut nextIndex _selectedIndex]
+        (loop
+            (-= nextIndex 1) 
+            (when (< nextIndex 0)
+                (set nextIndex (- columnControls.length 1)))
+            (when (or (dictGet _actions (nth columnControls nextIndex)) (Std.isOfType (nth columnControls nextIndex) KissInputText))
+                (set selectedIndex nextIndex)
+                (return)))))
+
 (defNew [&opt :String _title 
             :FlxColor bgColor
             :FlxColor _textColor
@@ -109,14 +129,32 @@
             (a)
             (keyHandler.start)
         })
+    (FlxMouseEvent.globalManager.add this)
+    (FlxMouseEvent.globalManager.setMouseMoveCallback this ->_
+        (set mouseMode true))
 
+    (prop &mut :Bool justPressedUIButton false)
     (set xHandler.cancelKey null)
     (set xHandler.onBadKey ->:Void [key context] 0)
     (set xHandler.onSelectItem
         ->:Void [:ShortcutAction a] {
+            (set justPressedUIButton true)
             (a)
             (xHandler.start)
         })
+    
+    (when upKey
+        (xHandler.registerItem "{${upKey}}" selectUp true))
+
+    (when downKey
+        (xHandler.registerItem "{${downKey}}" selectDown true))
+
+    (when enterKey
+        (xHandler.registerItem "{${enterKey}}"
+            ->:Void
+                (unless (= -1 _selectedIndex)
+                    (let [selectedControl (nth (getColumnControls) _selectedIndex)]
+                        ((dictGet _actions selectedControl) selectedControl))) true))
     
     (defAndCall method makeXControls
         (let [closeAction ->:Void {(hide)(when onClose (onClose))}]
@@ -177,7 +215,7 @@
     control)
 
 (prop &mut :Bool _useScrolling false)
-(method enableVerticalScrolling [&opt :String upKey :String downKey]
+(method enableVerticalScrolling []
     (set _useScrolling true)
     // add scroll up/scroll down buttons
     (assert xText)
@@ -400,44 +438,53 @@
         (true
             (color.getLightened amount))))
 
+(prop &mut :Bool mouseMode true)
+
 (prop &mut otherIsSelected false)
 (method &override update [:Float elapsed]
     (super.update elapsed)
+    (set justPressedUIButton false)
     (set otherIsSelected false)
+    (localVar columnControls (getColumnControls))
     (when (= (last windowStack) this)
         (when keyboardEnabled
             (unless (apply or (for textBox inputTexts.members textBox.hasFocus))
                 (keyHandler.update)))
         (xHandler.update)
-        
+    
         // Scroll wheel scroll up/down
         (when _useScrolling
             // TODO move all controls other than xButton and scrollbar. Clamp movement by top and bottom of all controls 
             null)
 
+        // Figure out whether to use mouse input or key/gamepad input for ui navigation
+        (when justPressedUIButton
+            (set mouseMode false))
+
         // Handle mouse input
-        (let [mousePos (FlxG.mouse.getScreenPosition controlCamera)]
-            // Click and hover on clickable text entries
-            (controls.forEach ->text
-                (whenLet [onClick (dictGet _actions text)]
-                                (let [color (dictGet _colors text)]
-                                    (when (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
-                                        (when FlxG.mouse.justPressed
-                                            (onClick text))
-                                        (set otherIsSelected true)
-                                        (set selectedIndex (columnControls.indexOf text))))))
-            // Click on text boxes to focus them
-            (inputTexts.forEach ->text
-                (when FlxG.mouse.justPressed
-                    (when (.containsPoint (text.getScreenBounds controlCamera) mousePos)
-                        (set otherIsSelected true)
-                        (set text.caretIndex (text.getCaretIndex controlCamera))
-                        (set selectedIndex (columnControls.indexOf text)))))
-            (unless otherIsSelected 
-                (set selectedIndex -1)
-                // Click anywhere else to take focus away from text boxes
-                (when FlxG.mouse.justPressed
-                    (inputTexts.forEach ->text (set text.hasFocus false)))))))
+        (when mouseMode
+            (let [mousePos (FlxG.mouse.getScreenPosition controlCamera)]
+                // Click and hover on clickable text entries
+                (controls.forEach ->text
+                    (whenLet [onClick (dictGet _actions text)]
+                                    (let [color (dictGet _colors text)]
+                                        (when (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
+                                            (when FlxG.mouse.justPressed
+                                                (onClick text))
+                                            (set otherIsSelected true)
+                                            (set selectedIndex (columnControls.indexOf text))))))
+                // Click on text boxes to focus them
+                (inputTexts.forEach ->text
+                    (when FlxG.mouse.justPressed
+                        (when (.containsPoint (text.getScreenBounds controlCamera) mousePos)
+                            (set otherIsSelected true)
+                            (set text.caretIndex (text.getCaretIndex controlCamera))
+                            (set selectedIndex (columnControls.indexOf text)))))
+                (unless otherIsSelected 
+                    (set selectedIndex -1)
+                    // Click anywhere else to take focus away from text boxes
+                    (when FlxG.mouse.justPressed
+                        (inputTexts.forEach ->text (set text.hasFocus false))))))))
 
 (function :SimpleWindow promptForChoice <>[T] [:String prompt
                                                 :Array<T> choices
@@ -535,7 +582,11 @@
 (method clearActions []
     (_actions.clear))
 
+(prop &mut :Null<Int> gamepadId null)
+
 (method enableGamepadInput [:Bool addDefaultUIInputs &opt :Map<FlxGamepadInputID,String> uiKeyMappings :Map<FlxGamepadInputID,String> otherKeyMappings :Int gamepadId]
+    (unless gamepadId (set gamepadId FlxInputDeviceID.ALL))
+    (set this.gamepadId gamepadId)
     (unless uiKeyMappings (set uiKeyMappings (new Map)))
     (localVar DEFAULT_UI_INPUTS [
         =>xKey [B]
