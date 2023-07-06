@@ -20,15 +20,24 @@
                 (never otherwise))))
 
 (method subMenu []
-    (.enableGamepadInput
-        (SimpleWindow.promptForChoice "SubMenu" ["A" "B" "C" "{tab} Back"]
-            ->:Void choice 
-                (case choice
-                    ("{tab} Back" (showMenu))
-                    (never otherwise)))
-        true
-        null
-        [=>B "tab"]))
+    (let [window (new SimpleWindow "SubMenu")]
+        (doFor letter ["A" "B" "C"]
+            (window.makeText letter null
+                ->_ (print "$letter clicked")
+                ->_ (print "$letter selected")
+                ->_ (print "$letter deselected")))
+        
+        (window.makeText "{tab} Back" null
+            ->:Void _ 
+                {
+                    (window.hide)
+                    (showMenu)
+                })
+        (window.enableGamepadInput
+            true
+            null
+            [=>B "tab"])
+        (window.show)))
 
 (method &override :Void update [:Float elapsed]
     (super.update elapsed))

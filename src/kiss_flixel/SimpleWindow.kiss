@@ -9,6 +9,39 @@
 
 (prop &mut keyboardEnabled true)
 
+(prop &mut :Int _selectedIndex -1)
+(prop :Int selectedIndex (property get set))
+(method get_selectedIndex [] _selectedIndex)
+(method set_selectedIndex [value]
+    (when (= value _selectedIndex) (return value))
+    (let [columnControls (getColumnControls)
+            controlToDeselect (nth columnControls _selectedIndex)
+            controlToSelect (nth columnControls value)]
+        // Disallow directly setting the SelectedIndex to a non-interactive control
+        (assert (or (= -1 value) (dictGet _actions controlToSelect) (Std.isOfType controlToSelect KissInputText)))
+        
+        (when controlToDeselect
+            (set controlToDeselect.color (dictGet _colors controlToDeselect)))
+        (whenLet [onDeselectLast (dictGet _onDeselectEvents controlToDeselect)]
+            (onDeselectLast controlToDeselect))
+        
+        (set _selectedIndex value)
+        (when (= -1 value) (return value))
+        (set controlToSelect.color (getHighlighted (dictGet _colors controlToSelect)))
+
+        // TODO play screenreader of the text
+
+        (whenLet [onSelect (dictGet _onSelectEvents controlToSelect)]
+            (onSelect controlToSelect))
+
+        // If selectedIndex refers to a KissInputText, make it active
+        (typeCase [controlToSelect]
+            ([:KissInputText inputText]
+                (inputTexts.forEach ->:Void [text] (set text.hasFocus false))
+                (set inputText.hasFocus true))
+            (otherwise))
+        value))
+
 (defNew [&opt :String _title 
             :FlxColor bgColor
             :FlxColor _textColor
@@ -106,6 +139,17 @@
 
 (prop &mut :Array<FlxSprite> nonLayoutControls [])
 
+(method getColumnControls []
+    (let [columnControls (controls.members.slice (if title 1 0))]
+        // Don't count special controls as part of any column:
+        (doFor c [xText leftText rightText]
+            (when c (columnControls.remove c)))
+        (doFor c columnTexts
+            (when c (columnControls.remove c)))
+        (doFor c nonLayoutControls
+            (when c (columnControls.remove c)))
+    columnControls))
+
 (method addControl [:FlxSprite control &opt :Bool ignoreLayout]
     (when ?ignoreLayout
         (nonLayoutControls.push control))
@@ -121,15 +165,7 @@
         (+= nextControlY control.height)
         // TODO controls that aren't the same height as text will be able to vertically overflow
         (unless _useScrolling
-            (let [columnControls (controls.members.slice (if title 1 0))]
-                // Don't count special controls as part of any column:
-                (doFor c [xText leftText rightText]
-                    (when c (columnControls.remove c)))
-                (doFor c columnTexts
-                    (when c (columnControls.remove c)))
-                (doFor c nonLayoutControls
-                    (when c (columnControls.remove c)))
-
+            (let [columnControls (getColumnControls)]
                 (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
                 (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
                     (set nextControlY 0)
@@ -268,8 +304,10 @@
             (when (= cameraColumn i) (-= ftext.x .width (new FlxText 0 0 0 ">" textSize))))))
 
 (prop :Map<FlxSprite,Action> _actions (new Map))
+(prop :Map<FlxSprite,Action> _onSelectEvents (new Map))
+(prop :Map<FlxSprite,Action> _onDeselectEvents (new Map))
 (prop :Map<FlxSprite,FlxColor> _colors (new Map))
-(method makeText [:String text &opt :FlxColor color :Action onClick :Bool noShortcut]
+(method makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut]
     (let [ftext (new FlxText nextControlX nextControlY 0 text textSize)]
         (set ftext.color (or color textColor))
         (dictSet _colors ftext ftext.color)
@@ -278,6 +316,10 @@
             (dictSet _actions ftext onClick)
             (unless noShortcut
                 (keyHandler.registerItem text ->:Void (onClick ftext))))
+        (when onSelect
+            (dictSet _onSelectEvents ftext onSelect))
+        (when onDeselect
+            (dictSet _onDeselectEvents ftext onDeselect))
         ftext))
 
 (method makeWrappedText [:String _text &opt :FlxColor color]
@@ -379,27 +421,23 @@
             (controls.forEach ->text
                 (whenLet [onClick (dictGet _actions text)]
                                 (let [color (dictGet _colors text)]
-                                    (if (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
-                                            {
-                                                (when FlxG.mouse.justPressed
-                                                    (onClick text))
-                                                (set otherIsSelected true)
-                                                (set text.color (getHighlighted color))
-                                            }
-                                        {
-                                            (set text.color color)
-                                        }))))
+                                    (when (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
+                                        (when FlxG.mouse.justPressed
+                                            (onClick text))
+                                        (set otherIsSelected true)
+                                        (set selectedIndex (columnControls.indexOf text))))))
             // Click on text boxes to focus them
             (inputTexts.forEach ->text
                 (when FlxG.mouse.justPressed
                     (when (.containsPoint (text.getScreenBounds controlCamera) mousePos)
-                        (inputTexts.forEach ->text (set text.hasFocus false))
                         (set otherIsSelected true)
                         (set text.caretIndex (text.getCaretIndex controlCamera))
-                        (set text.hasFocus true))))
-            // Click anywhere else to take focus away from text boxes
-            (when (and !otherIsSelected FlxG.mouse.justPressed)
-                (inputTexts.forEach ->text (set text.hasFocus false))))))
+                        (set selectedIndex (columnControls.indexOf text)))))
+            (unless otherIsSelected 
+                (set selectedIndex -1)
+                // Click anywhere else to take focus away from text boxes
+                (when FlxG.mouse.justPressed
+                    (inputTexts.forEach ->text (set text.hasFocus false)))))))
 
 (function :SimpleWindow promptForChoice <>[T] [:String prompt
                                                 :Array<T> choices
