@@ -514,11 +514,15 @@
                 (controls.forEach ->text
                     (whenLet [onClick (dictGet _actions text)]
                                     (let [color (dictGet _colors text)]
-                                        (when (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
-                                            (when FlxG.mouse.justPressed
-                                                (onClick text))
-                                            (set otherIsSelected true)
-                                            (set selectedIndex (columnControls.indexOf text))))))
+                                        (if (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
+                                                {
+                                                    (when FlxG.mouse.justPressed
+                                                        (onClick text))
+                                                    (set otherIsSelected true)
+                                                    (set text.color (getHighlighted (dictGet _colors text)))
+                                                    (set selectedIndex (columnControls.indexOf text))
+                                                }
+                                            (set text.color (dictGet _colors text))))))
                 // Click on text boxes to focus them
                 (inputTexts.forEach ->text
                     (when FlxG.mouse.justPressed
