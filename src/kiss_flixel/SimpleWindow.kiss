@@ -389,7 +389,9 @@
         (when onClick
             (dictSet _actions ftext onClick)
             (unless noShortcut
-                (keyHandler.registerItem text ->:Void (onClick ftext))))
+                (keyHandler.registerItem text ->:Void (onClick ftext)))
+            (when (= -1 _selectedIndex)
+                (set selectedIndex (.indexOf (_nonUIControls) ftext))))
         (when onSelect
             (dictSet _onSelectEvents ftext onSelect))
         (when onDeselect
@@ -480,7 +482,7 @@
         (true
             (color.getLightened amount))))
 
-(prop &mut :Bool mouseMode true)
+(prop &mut :Bool mouseMode false)
 
 (prop &mut otherIsSelected false)
 (method &override update [:Float elapsed]

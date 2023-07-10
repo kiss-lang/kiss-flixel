@@ -1,4 +1,5 @@
 (import flixel.FlxState)
+(import flixel.text.FlxText)
 (import kiss_flixel.SimpleWindow)
 (extends FlxState)
 
@@ -6,6 +7,7 @@
     (super.create)
     
     (SimpleWindow.sensibleDefaultKeys)
+    (set SimpleWindow.defaultSelectionMarker (new FlxText 0 0 ">" SimpleWindow.textSize))
 
     (showMenu))
 
