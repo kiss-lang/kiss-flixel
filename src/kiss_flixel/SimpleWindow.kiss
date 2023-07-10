@@ -496,8 +496,10 @@
     
         // Scroll wheel scroll up/down
         (when _useScrolling
-            // TODO move all controls other than xButton and scrollbar. Clamp movement by top and bottom of all controls 
-            null)
+            (let [scrollAmount FlxG.mouse.wheel
+                    scrollFunc (if (> 0 scrollAmount) _scrollDown _scrollUp)]
+            (doFor _ (range (Std.int (Math.abs scrollAmount)))
+                (scrollFunc))))
 
         // Figure out whether to use mouse input or key/gamepad input for ui navigation
         (when justPressedUIButton
