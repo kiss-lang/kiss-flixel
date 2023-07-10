@@ -36,7 +36,7 @@
 
         // HANDLE WHEN A CONTROL IS SELECTED:
         {
-            (when ~selectionMarker
+            (when selectionMarker
                 (set selectionMarker.visible true)
                 (set selectionMarker.y controlToSelect.y)
                 (set selectionMarker.x (- controlToSelect.x selectionMarker.width textSize)))
