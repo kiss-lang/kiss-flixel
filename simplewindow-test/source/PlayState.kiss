@@ -4,8 +4,10 @@
 
 (method &override :Void create []
     (super.create)
-    (showMenu)
-    )
+    
+    (SimpleWindow.sensibleDefaultKeys)
+
+    (showMenu))
 
 (method showMenu []
     (SimpleWindow.promptForChoice "Testing SimpleWindow" ["Vertical" "Menu" "Quit"]
@@ -20,7 +22,7 @@
                 (never otherwise))))
 
 (method subMenu []
-    (let [window (new SimpleWindow "SubMenu" null null null null "escape" "left" "right" "up" "down" "enter")]
+    (let [window (new SimpleWindow "SubMenu")]
         (doFor letter ["A" "B" "C"]
             (window.makeText letter null
                 ->_ (print "$letter clicked")
