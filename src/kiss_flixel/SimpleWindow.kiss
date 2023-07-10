@@ -391,7 +391,7 @@
             (unless noShortcut
                 (keyHandler.registerItem text ->:Void (onClick ftext)))
             (when (= -1 _selectedIndex)
-                (set selectedIndex (.indexOf (_nonUIControls) ftext))))
+                (set selectedIndex (.indexOf (getColumnControls) ftext))))
         (when onSelect
             (dictSet _onSelectEvents ftext onSelect))
         (when onDeselect
