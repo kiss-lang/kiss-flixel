@@ -8,11 +8,16 @@
 (prop :FlxCamera controlCamera)
 
 (prop &mut keyboardEnabled true)
+(prop :FlxSprite selectionMarker)
+(var &mut :FlxSprite defaultSelectionMarker)
 
 (prop &mut :Int _selectedIndex -1)
 (prop :Int selectedIndex (property get set))
 (method get_selectedIndex [] _selectedIndex)
 (method set_selectedIndex [value]
+    (when (= -1 value)
+        (when selectionMarker
+            (set selectionMarker.visible false)))
     (when (= value _selectedIndex) (return value))
     (let [columnControls (getColumnControls)
             controlToDeselect (nth columnControls _selectedIndex)
@@ -29,10 +34,18 @@
         (when (= -1 value) (return value))
         (set controlToSelect.color (getHighlighted (dictGet _colors controlToSelect)))
 
-        // TODO play screenreader of the text
+        // HANDLE WHEN A CONTROL IS SELECTED:
+        {
+            (when ~selectionMarker
+                (set selectionMarker.visible true)
+                (set selectionMarker.y controlToSelect.y)
+                (set selectionMarker.x (- controlToSelect.x selectionMarker.width textSize)))
 
-        (whenLet [onSelect (dictGet _onSelectEvents controlToSelect)]
-            (onSelect controlToSelect))
+            // TODO play screenreader of the text
+
+            (whenLet [onSelect (dictGet _onSelectEvents controlToSelect)]
+                (onSelect controlToSelect))
+        }
 
         // If selectedIndex refers to a KissInputText, make it active
         (typeCase [controlToSelect]
@@ -86,7 +99,8 @@
             :String _leftKey :String _rightKey
             :String _upKey :String _downKey
             :String _enterKey
-            :ShortcutAction _onClose]
+            :ShortcutAction _onClose
+            :FlxSprite _selectionMarker]
     
     [:String title (or _title "")
         &mut :Float nextControlX 0
@@ -118,12 +132,15 @@
         _height
         (or bgColor FlxColor.BLACK))
     (screenCenter)
+    (set selectionMarker (or _selectionMarker (defaultSelectionMarker?.clone)))
     
     (set controlCamera (new FlxCamera (Std.int x) (Std.int y) (Std.int width) (Std.int height)))
     (set controlCamera.bgColor FlxColor.TRANSPARENT)
     
     // Top-left corner for controls is (0,0) because a camera displays them
     (set nextControlX 0)
+    (when selectionMarker 
+        (set nextControlX (+ selectionMarker.width textSize)))
     (set nextControlY 0)
 
     (let [textHeight
@@ -218,8 +235,11 @@
         (+= nextControlY control.height)
         // TODO controls that aren't the same height as text will be able to vertically overflow
         (unless _useScrolling
-            (let [columnControls (getColumnControls)]
-                (setNth columnWidths -1 (max (+ control.width textSize) (last columnWidths)))
+            (let [columnControls (getColumnControls)
+                    &mut newControlWidth (+ control.width textSize)]
+                (when selectionMarker
+                    (+= newControlWidth selectionMarker.width textSize))
+                (setNth columnWidths -1 (max newControlWidth (last columnWidths)))
                 (when (and columnControls (= 0 (% columnControls.length controlsPerColumn)))
                     (set nextControlY 0)
                     (when title (+= nextControlY control.height))
@@ -431,6 +451,10 @@
         (FlxG.cameras.add controlCamera false)
         (FlxG.state.add this)
         (FlxG.state.add controls)
+        (when selectionMarker
+            (set selectionMarker.visible !(= -1 _selectedIndex))
+            (set selectionMarker.cameras [controlCamera])
+            (FlxG.state.add selectionMarker))
         (windowStack.push this)
         (keyHandler.start)
         (xHandler.start)
@@ -441,6 +465,8 @@
         (FlxG.cameras.remove controlCamera false)
         (FlxG.state.remove this true)
         (FlxG.state.remove controls true)
+        (when selectionMarker
+            (FlxG.state.remove selectionMarker true))
         (windowStack.remove this)
         (keyHandler.cancel)
         (xHandler.cancel)
