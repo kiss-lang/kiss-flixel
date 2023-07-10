@@ -115,7 +115,7 @@
         :String upKey (or _upKey defaultUpKey)
         :String downKey (or _downKey defaultDownKey)
         :String enterKey (or _enterKey defaultEnterKey)
-        :ShortcutAction onClose _onClose
+        &mut :ShortcutAction onClose _onClose
         :FlxTypedGroup<FlxSprite> controls (new FlxTypedGroup)
         :FlxKeyShortcutHandler<ShortcutAction> keyHandler (new FlxKeyShortcutHandler)
         // The xHandler exists so that when keyboard shortcuts are disabled,
@@ -282,8 +282,9 @@
     (apply or (for _ (range SCROLL_LINES) (_scrollDown))))
 
 (method :Bool _scrollDown []
-    (let [:kiss.List<FlxSprite> controls (_nonUIControls)]
-        (when (< .y (last controls) _height)
+    (let [:kiss.List<FlxSprite> controls (_nonUIControls)
+            lastControl (last controls)]
+        (when (< (+ lastControl.y lastControl.height)  _height)
             (return false))
         (doFor c controls
             (-= c.y c.height)

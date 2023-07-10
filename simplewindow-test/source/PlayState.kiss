@@ -14,7 +14,7 @@
         ->:Void choice 
             (case choice
                 ("Vertical"
-                    null)
+                    (verticalMenu))
                 ("Menu"
                     (subMenu))
                 ("Quit"
@@ -39,6 +39,15 @@
             true
             null
             [=>B "tab"])
+        (window.show)))
+
+(method verticalMenu []
+    (let [window (new SimpleWindow "Vertical Menu" true)]
+        (set window.onClose ->:Void {(window.hide)(showMenu)})
+        (window.enableVerticalScrolling)
+        (doFor num (range 50)
+            (window.makeText "$num"))
+        (window.enableGamepadInput true)
         (window.show)))
 
 (method &override :Void update [:Float elapsed]
