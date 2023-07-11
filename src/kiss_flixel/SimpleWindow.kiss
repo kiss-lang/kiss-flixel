@@ -741,7 +741,8 @@
         (doFor key [xKey leftKey rightKey upKey downKey enterKey]
             (whenLet [key key buttons (dictGet DEFAULT_UI_INPUTS key)]
                 (doFor button buttons
-                    (dictSet uiKeyMappings button key)))))
+                    (unless (uiKeyMappings.exists button)
+                        (dictSet uiKeyMappings button key))))))
     (xHandler.enableGamepadInput uiKeyMappings gamepadId)
     (when otherKeyMappings
         (keyHandler.enableGamepadInput otherKeyMappings gamepadId))
