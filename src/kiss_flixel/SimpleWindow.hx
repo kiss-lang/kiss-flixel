@@ -17,7 +17,8 @@ import flixel.input.actions.FlxActionInput;
 import flixel.input.FlxInput;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.mouse.FlxMouseEvent;
-import flixel.addons.display.FlxExtendedSprite;
+import kiss_flixel.KissExtendedSprite;
+import flixel.addons.plugin.FlxMouseControl;
 
 typedef ShortcutAction = Void->Void;
 typedef Action = FlxSprite->Void;

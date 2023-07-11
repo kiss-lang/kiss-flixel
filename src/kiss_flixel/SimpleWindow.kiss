@@ -251,11 +251,11 @@
     control)
 
 (prop &mut :Bool _useScrolling false)
-(prop &mut :FlxExtendedSprite scrollBar null)
+(prop &mut :KissExtendedSprite scrollBar null)
 (prop &mut :Float scrollBarMin 0)
 (prop &mut :Float scrollBarMax 0)
 (prop &mut :Null<Int> scrollStepsPossible null)
-(prop &mut :Int maxScrollPos)
+(prop &mut :Bool draggingScrollBar false)
 
 // Measure how much scrolling is possible in this thang for the scrollBar
 (method :Void measureVerticalScrolling []
@@ -277,9 +277,17 @@
             scrollBarHeight (Std.int (* (- scrollBarMax scrollBarMin) (/ numVisibleControls columnControls.length)))]
         (scrollBar.setGraphicSize (Std.int scrollBar.width) scrollBarHeight)
         (scrollBar.updateHitbox)
-        (-= scrollBarMax scrollBarHeight))
+        (once (FlxG.plugins.add (new FlxMouseControl)))
+        (scrollBar.enableMouseDrag (new FlxRect scrollBar.x scrollBar.y scrollBar.width (- scrollBarMax scrollBarMin)))
 
-    )
+        (set scrollBar.mouseStartDragCallback ->[_ _ _]
+            (set draggingScrollBar true))
+        (set scrollBar.mouseStopDragCallback ->[_ _ _] {
+            (positionScrollBar)
+            (set draggingScrollBar false)
+        })
+
+        (-= scrollBarMax scrollBarHeight)))
 
 (method enableVerticalScrolling []
     (set _useScrolling true)
@@ -305,9 +313,10 @@
     
     (let [scrollBarWidth (iHalf textSize)]
         (set scrollBarMin (+ upText.y upText.height))
+        // the scrollBarMax will be overridden when measureVerticalScrolling() is called
         (set scrollBarMax downText.y)
-        (set scrollBar (new FlxExtendedSprite))
-        // The height will be overridden when measureVerticalScrolling() is called
+        (set scrollBar (new KissExtendedSprite))
+        // The height will also be overridden 
         (scrollBar.makeGraphic scrollBarWidth 1 textColor)
         (dictSet _colors scrollBar textColor)
         (set scrollBar.x
@@ -315,6 +324,7 @@
                 (fHalf scrollBarWidth)))
         (set scrollBar.y scrollBarMin)
         (set scrollBar.cameras [controlCamera])
+
         (controls.add scrollBar))
     
     // register upKey/downKey
@@ -569,6 +579,13 @@
                     scrollFunc (if (> 0 scrollAmount) _scrollDown _scrollUp)]
             (doFor _ (range (Std.int (Math.abs scrollAmount)))
                 (scrollFunc))))
+
+        // Scroll bar drag up/down
+        (when draggingScrollBar
+            (let [scrollPercent (/ (- scrollBar.y scrollBarMin) (- scrollBarMax scrollBarMin))
+                    currentScrollTarget (Math.round (* scrollStepsPossible scrollPercent))]
+                (let [scrollFunc (if (> 0 (- currentScrollTarget currentScroll)) _scrollUp _scrollDown)]
+                    (until (= currentScroll currentScrollTarget) (scrollFunc)))))
 
         // Figure out whether to use mouse input or key/gamepad input for ui navigation
         (when justPressedUIButton
