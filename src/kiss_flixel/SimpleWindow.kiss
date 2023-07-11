@@ -131,6 +131,7 @@
         _width
         _height
         (or bgColor FlxColor.BLACK))
+    (flixel.util.FlxSpriteUtil.drawRect this 0 0 _width _height FlxColor.TRANSPARENT (object color textColor))
     (screenCenter)
     (set selectionMarker (or _selectionMarker (defaultSelectionMarker?.clone)))
     
