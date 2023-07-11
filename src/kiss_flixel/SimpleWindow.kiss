@@ -453,6 +453,7 @@
 (prop :Map<FlxSprite,Action> _onSelectEvents (new Map))
 (prop :Map<FlxSprite,Action> _onDeselectEvents (new Map))
 (prop :Map<FlxSprite,FlxColor> _colors (new Map))
+(prop &mut :Bool selectFirstInteractiveControl true)
 (method makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut]
     (let [ftext (new FlxText nextControlX nextControlY 0 text textSize)]
         (set ftext.color (or color textColor))
@@ -462,7 +463,7 @@
             (dictSet _actions ftext onClick)
             (unless noShortcut
                 (keyHandler.registerItem text ->:Void (onClick ftext)))
-            (when (= -1 _selectedIndex)
+            (when (and selectFirstInteractiveControl (= -1 _selectedIndex))
                 (set selectedIndex (.indexOf (getColumnControls) ftext))))
         (when onSelect
             (dictSet _onSelectEvents ftext onSelect))
