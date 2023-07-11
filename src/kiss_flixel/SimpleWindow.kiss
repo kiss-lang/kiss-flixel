@@ -212,12 +212,13 @@
 (method getColumnControls []
     (let [columnControls (controls.members.slice (if title 1 0))]
         // Don't count special controls as part of any column:
-        (doFor c [xText leftText rightText]
+        (doFor c [xText leftText rightText upText downText]
             (when c (columnControls.remove c)))
         (doFor c columnTexts
             (when c (columnControls.remove c)))
         (doFor c nonLayoutControls
             (when c (columnControls.remove c)))
+    (columnControls.remove scrollBar)
     columnControls))
 
 (method addControl [:FlxSprite control &opt :Bool ignoreLayout]
@@ -250,8 +251,39 @@
     control)
 
 (prop &mut :Bool _useScrolling false)
+(prop &mut :FlxExtendedSprite scrollBar null)
+(prop &mut :Float scrollBarMin 0)
+(prop &mut :Float scrollBarMax 0)
+(prop &mut :Null<Int> scrollStepsPossible null)
+(prop &mut :Int maxScrollPos)
+
+// Measure how much scrolling is possible in this thang for the scrollBar
+(method :Void measureVerticalScrolling []
+    (set scrollStepsPossible 0)
+    (while (_scrollUp true) null)
+    (while (_scrollDown true)
+        (+= scrollStepsPossible 1))
+    (while (_scrollUp true)
+        null)
+    
+    (when (= 0 scrollStepsPossible) (return))
+    
+    (let [columnControls
+                (getColumnControls)
+            numVisibleControls
+                (->(doFor i (range columnControls.length)
+                        (when .isEmpty (.intersection (controlCamera.getViewRect) (.getScreenBounds (nth columnControls i) controlCamera))
+                            (return (- i 1)))))
+            scrollBarHeight (Std.int (* (- scrollBarMax scrollBarMin) (/ numVisibleControls columnControls.length)))]
+        (scrollBar.setGraphicSize (Std.int scrollBar.width) scrollBarHeight)
+        (scrollBar.updateHitbox)
+        (-= scrollBarMax scrollBarHeight))
+
+    )
+
 (method enableVerticalScrolling []
     (set _useScrolling true)
+    (set mouseMode true)
     // add scroll up/scroll down buttons
     (assert xText)
     (set upText (new FlxText xText.x (+ xText.y xText.height) 0 "v" textSize))
@@ -271,6 +303,20 @@
     (set downText.y (- _height downText.height))
     (controls.add downText)
     
+    (let [scrollBarWidth (iHalf textSize)]
+        (set scrollBarMin (+ upText.y upText.height))
+        (set scrollBarMax downText.y)
+        (set scrollBar (new FlxExtendedSprite))
+        // The height will be overridden when measureVerticalScrolling() is called
+        (scrollBar.makeGraphic scrollBarWidth 1 textColor)
+        (dictSet _colors scrollBar textColor)
+        (set scrollBar.x
+            (- (+ upText.x (fHalf upText.width))
+                (fHalf scrollBarWidth)))
+        (set scrollBar.y scrollBarMin)
+        (set scrollBar.cameras [controlCamera])
+        (controls.add scrollBar))
+    
     // register upKey/downKey
     (when upKey
         (xHandler.registerItem "{${upKey}}" scrollUp true))
@@ -281,27 +327,42 @@
 (method :Bool scrollDown []
     (apply or (for _ (range SCROLL_LINES) (_scrollDown))))
 
-(method :Bool _scrollDown []
+(prop &mut :Int currentScroll 0)
+(method :Bool _scrollDown [&opt :Bool fake]
     (let [:kiss.List<FlxSprite> controls (_nonUIControls)
             lastControl (last controls)]
-        (when (< (+ lastControl.y lastControl.height)  _height)
+        (when (< (+ lastControl.y lastControl.height) _height)
             (return false))
+
         (doFor c controls
             (-= c.y c.height)
             (set c.visible !?(= c.y titleText?.y)))
+        
+        (unless fake
+            (+= currentScroll 1)
+            (positionScrollBar))
         true))
 
-(method :Bool _scrollUp []
+(method :Bool _scrollUp [&opt :Bool fake]
     (let [:kiss.List<FlxSprite> controls (_nonUIControls)
             minY (if titleText titleText.height 0)]
         (when (>= .y (first controls) minY)
             (return false))
+
         (doFor c controls
             (+= c.y c.height)
             (set c.visible !?(= c.y titleText?.y)))
+        (unless fake
+            (-= currentScroll 1)
+            (positionScrollBar))
         true))
 (method :Bool scrollUp []
     (apply or (for _ (range SCROLL_LINES) (_scrollUp))))
+
+(method positionScrollBar []
+    (let [scrollPercent (/ currentScroll scrollStepsPossible)
+            scrollBarY (+ scrollBarMin (* scrollPercent (- scrollBarMax scrollBarMin)))]
+        (set scrollBar.y scrollBarY)))
 
 (method scrollToBottom []
     (assert _useScrolling)
@@ -310,7 +371,7 @@
         null))
 
 (method _nonUIControls []
-    (filter controls.members ->m ?(when (= -1 (.indexOf [xText upText downText titleText] (cast m))) m)))
+    (filter controls.members ->m ?(when (= -1 (.indexOf [xText upText downText titleText scrollBar] (cast m))) m)))
 
 (prop &mut :FlxText titleText)
 (prop &mut :FlxText leftText)
@@ -443,6 +504,12 @@
     (set titleText (makeText title titleColor)))
 
 (method :Void show [&opt :Int _cameraColumn]
+    (when _useScrolling
+        (measureVerticalScrolling)
+        (when (= 0 scrollStepsPossible)
+            (controls.remove upText)
+            (controls.remove downText)
+            (controls.remove scrollBar)))
     (when (and _cameraColumn !(= cameraColumn _cameraColumn))
         (assert (<= 0 _cameraColumn (- columnWidths.length 1)) "Tried to show out-of-bounds camera column ${_cameraColumn} of ${columnWidths.length}")
         (while (> cameraColumn _cameraColumn)
@@ -530,6 +597,10 @@
                             (set otherIsSelected true)
                             (set text.caretIndex (text.getCaretIndex controlCamera))
                             (set selectedIndex (columnControls.indexOf text)))))
+                (when scrollBar
+                    (if (.containsPoint (scrollBar.getScreenBounds controlCamera) mousePos)
+                            (set scrollBar.color (getHighlighted (dictGet _colors scrollBar)))
+                        (set scrollBar.color (dictGet _colors scrollBar))))
                 (unless otherIsSelected 
                     (set selectedIndex -1)
                     // Click anywhere else to take focus away from text boxes
