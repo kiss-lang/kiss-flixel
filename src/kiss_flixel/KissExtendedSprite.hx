@@ -160,13 +160,30 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
     override function updateDrag() {
         var mouseTotalMovement = FlxG.mouse.getWorldPosition().subtractPoint(mouseStartPos);
         var nextPos = dragStartPos.copyTo().addPoint(mouseTotalMovement);
+        
+        var lastX = x;
+        var lastY = y;
+
         x = nextPos.x;
         y = nextPos.y;
+
+        if (boundsRect != null)
+		{
+			checkBoundsRect();
+		}
+
+		if (boundsSprite != null)
+		{
+			checkBoundsSprite();
+		}
+
+        var spriteTotalMovement = new FlxPoint(x - lastX, y - lastY);
+
         var l = connectedAndSelectedSprites();
         for (i in 0...l.length) {
             var sprite = l[i];
             var startPos = connectedSpritesStartPos[i];
-            var nextPos = startPos.copyTo().addPoint(mouseTotalMovement);
+            var nextPos = startPos.copyTo().addPoint(spriteTotalMovement);
             sprite.x = nextPos.x;
             sprite.y = nextPos.y;
         }

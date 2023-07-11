@@ -9,6 +9,7 @@ import kiss_flixel.KissInputText;
 import flixel.text.FlxText;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
+import flixel.math.FlxRect;
 import flixel.group.FlxGroup;
 import kiss_flixel.FlxKeyShortcutHandler;
 import flixel.input.actions.FlxAction;
