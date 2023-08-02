@@ -1,17 +1,20 @@
-(var &mut :FlxActionManager manager null)
 (var &mut :FlxActionDigital f1Action null)
 
-(function f1ToRecord []
-    (unless manager
-        (set manager (new FlxActionManager))
-        (set manager.resetOnStateSwitch NONE))
-    (unless (FlxG.inputs.list.contains manager)
-        (FlxG.inputs.add manager))
+(function f1ToRecord [&opt :FlxActionManager _manager]
+    (unless _manager
+        (set _manager (new FlxActionManager))
+        (set _manager.resetOnStateSwitch NONE))
+
+    (doFor mightByManager (reverse FlxG.inputs.list)
+        (when (Std.isOfType mightByManager FlxActionManager)
+            (FlxG.inputs.remove mightByManager)))
+    (FlxG.inputs.add _manager)
     (unless f1Action
         (set f1Action (new FlxActionDigital "Toggle OBS Recording"))
         (f1Action.addKey FlxKey.F1 JUST_PRESSED)
         (set f1Action.callback
             ->_ (if OBSTools.obsIsRecording
                         (OBSTools.stopObs)
-                    (OBSTools.startObs)))
-        (manager.addAction f1Action)))
+                    (OBSTools.startObs))))
+    (_manager.removeAction f1Action 0)
+    (_manager.addAction f1Action))
