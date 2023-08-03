@@ -162,10 +162,6 @@
             (a)
             (keyHandler.start)
         })
-    (FlxMouseEvent.globalManager.add this)
-    (FlxMouseEvent.globalManager.setMouseMoveCallback this ->_
-        (set mouseMode true))
-
     (prop &mut :Bool justPressedUIButton false)
     (set xHandler.cancelKey null)
     (set xHandler.onBadKey ->:Void [key context] 0)
@@ -540,10 +536,17 @@
         (windowStack.push this)
         (keyHandler.start)
         (xHandler.start)
+
+        (FlxMouseEvent.globalManager.add this)
+        (FlxMouseEvent.globalManager.setMouseMoveCallback this ->_
+            (set mouseMode true))
+
         (set _shown true)))
 
 (method :Void hide []
     (when _shown
+        (FlxMouseEvent.globalManager.remove this)
+
         (FlxG.cameras.remove controlCamera false)
         (FlxG.state.remove this true)
         (FlxG.state.remove controls true)
