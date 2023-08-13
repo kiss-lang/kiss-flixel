@@ -1,0 +1,21 @@
+(import sys.FileSystem)
+(import sys.io.File)
+
+(let [app (Express.call)
+        port 3001]
+
+    (unless (FileSystem.exists "feedback")
+        (FileSystem.createDirectory "feedback"))
+
+    (app.use (Express.text))
+
+    (app.post "/" ->[req res next] {
+        (print req.body)
+        (File.saveContent "feedback/$(.toString (Date.now)).txt" req.body)
+
+        (res.send "received")
+    })
+    
+    (#unless test
+        (app.listen port ->(print "kiss-express listening at http://localhost:$port"))))
+

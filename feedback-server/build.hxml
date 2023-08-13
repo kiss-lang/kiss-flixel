@@ -1,0 +1,7 @@
+-lib kiss
+-lib kiss-express
+-cp externs
+-cp src
+--main feedback_server.Main
+--js index.js
+--cmd node index.js
