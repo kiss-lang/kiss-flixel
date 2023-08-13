@@ -4,7 +4,6 @@
   "description": "A server accepting simple feedback and logs via http requests",
   "main": "index.js",
   "scripts": {
-    "postinstall": "dts2hx --all --noLibWrap"
   },
   "dependencies": {
     "@types/express": "^4.17.13",
