@@ -473,6 +473,7 @@ class KissInputText extends FlxText
 		var textH:Float = 0;
 		var textW:Float = 0;
 		var lastW:Float = 0;
+		var lastH:Float = 0;
 
 		// Flash textFields have a "magic number" 2 pixel gutter all around
 		// It does not seem to vary with font, size, border, etc, and does not seem to be customizable.
@@ -483,13 +484,23 @@ class KissInputText extends FlxText
 		for (i in 0...numChars)
 		{
 			textField.appendText(Text.substr(i, 1)); // add a character
-			textW = textField.textWidth; // count up total text width
 			if (i == 0)
 			{
 				textH = textField.textHeight; // count height after first char
 			}
+			if (Text.charAt(i) == "\n") {
+				lastH += textField.textHeight;
+				_charBoundaries[i].x = 0;
+				_charBoundaries[i].y = lastH;
+				_charBoundaries[i].width = magicX;
+				_charBoundaries[i].height = textH;
+				textField.text = "";
+				lastW = 0;
+				continue;
+			}
+			textW = textField.textWidth; // count up total text width
 			_charBoundaries[i].x = magicX + lastW; // place x at end of last character
-			_charBoundaries[i].y = magicY; // place y at zero
+			_charBoundaries[i].y = magicY + lastH; // place y at end of last line
 			_charBoundaries[i].width = (textW - lastW); // place width at (width so far) minus (last char's end point)
 			_charBoundaries[i].height = textH;
 			lastW = textW;
@@ -529,7 +540,7 @@ class KissInputText extends FlxText
 		{
 			for (r in _charBoundaries)
 			{
-				if (X >= r.left && X <= r.right)
+				if (X >= r.left && X <= r.right && Y >= r.top && Y <= r.bottom)
 				{
 					return i;
 				}
