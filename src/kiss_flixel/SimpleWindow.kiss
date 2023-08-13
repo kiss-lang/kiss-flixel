@@ -467,8 +467,8 @@
             (dictSet _onDeselectEvents ftext onDeselect))
         ftext))
 
-(method makeWrappedText [:String _text &opt :FlxColor color]
-    (assert _useScrolling)
+(method makeWrappedText [:String _text &opt :FlxColor color :Bool skipScrollingCheck]
+    (unless skipScrollingCheck (assert _useScrolling))
     (let [text (new FlxText nextControlX nextControlY 0 _text textSize)
             maxWidth (- _width nextControlX)]
         (set text.color (or color textColor))
