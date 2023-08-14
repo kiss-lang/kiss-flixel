@@ -480,7 +480,7 @@
                         (nextLineTokens.unshift (tokens.pop))
                         (set text.text (tokens.join " ")))
                     (addControl text)
-                    (makeWrappedText (nextLineTokens.join " "))))
+                    (makeWrappedText (nextLineTokens.join " ") color skipScrollingCheck)))
             (true
                 (addControl text)))))
 
