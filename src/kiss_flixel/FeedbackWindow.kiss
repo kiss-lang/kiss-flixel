@@ -82,9 +82,11 @@
                 (future.ready timeout)))
     }))
 
-(function :Void collectFeedback [:Void->Void onClose
+(function :SimpleWindow collectFeedback [:Void->Void onClose
                                 &opt :FlxColor bgColor
                                 :FlxColor textColor
                                 :Bool xButton
                                 :String xKey]
-    (.show (new FeedbackWindow onClose bgColor textColor xButton xKey)))
+    (let [w (new FeedbackWindow onClose bgColor textColor xButton xKey)]
+        (w.show)
+        w))
