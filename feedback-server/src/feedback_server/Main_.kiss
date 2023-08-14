@@ -7,7 +7,7 @@
     (unless (FileSystem.exists "feedback")
         (FileSystem.createDirectory "feedback"))
 
-    (app.use (Express.text))
+    (app.use (Express.text (object limit "10mb")))
 
     (app.post "/" ->[req res next] {
         (print req.body)
