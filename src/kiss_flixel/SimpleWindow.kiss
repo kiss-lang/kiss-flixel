@@ -655,7 +655,9 @@
         null
         null
         enterKey
-        onDismiss))
+        onDismiss
+        false
+        true))
 
 (function :SimpleWindow promptForChoice <>[T] [:String prompt
                                             :Array<T> choices
@@ -673,9 +675,12 @@
                                             :String downKey
                                             :String enterKey
                                             :ShortcutAction onClose
-                                            :Bool noShortcuts]
-(let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
+                                            :Bool noShortcuts
+                                            :Bool wrapPrompt]
+(let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
         choiceColor (or choiceColor titleColor FlxColor.WHITE)]
+    (when wrapPrompt
+        (window.makeWrappedText prompt titleColor true))
     (doFor choice choices
         (window.makeText (Std.string choice) choiceColor
             (when (Std.string choice)
