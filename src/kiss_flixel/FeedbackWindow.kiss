@@ -62,7 +62,9 @@
             (makeText "Sending...")
 
             (localFunction errorMessage [:Dynamic e]
-                (SimpleWindow.notify "Failed to send. Please try again later." ->:Void {(hide)(onClose)})
+                (kiss_flixel.Log.log "Feedback:\n${inputText.text}\n\n")
+                (hide)
+                (SimpleWindow.notify "Failed to send. Please try again later. (Your message has been saved in the log and will be included later--you won't have to type it again.)" ->:Void (onClose))
                 (print "Failed to send feedback! Error:")
                 (print e))
 
@@ -71,7 +73,10 @@
                     _ (future.onComplete ->:Void _ 
                         (let [body (request.responseData.toString)]
                             (if (= body "received")
-                                    (SimpleWindow.notify "Your feedback has been received!" ->:Void {(hide)(onClose)})            
+                                    {
+                                        (hide)
+                                        (SimpleWindow.notify "Your feedback has been received!" ->:Void (onClose))
+                                    }
                                 (errorMessage "result was $body"))))
                     ]
                 (future.ready timeout)))
