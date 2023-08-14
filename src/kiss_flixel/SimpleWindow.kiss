@@ -629,41 +629,40 @@
                     (when FlxG.mouse.justPressed
                         (inputTexts.forEach ->text (set text.hasFocus false))))))))
 
-(function :SimpleWindow promptForChoice <>[T] [:String prompt
-                                                :Array<T> choices
-                                                :T->Void onChoice
-                                                &opt :FlxColor bgColor
-                                                :FlxColor titleColor
-                                                :FlxColor choiceColor
-                                                :Float percentWidth
-                                                :Float percentHeight
-                                                :Bool xButton
-                                                :String xKey
-                                                :String leftKey
-                                                :String rightKey
-                                                :String upKey
-                                                :String downKey
-                                                :String enterKey
-                                                :ShortcutAction onClose
-                                                :Bool noShortcuts]
-    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
-            choiceColor (or choiceColor titleColor FlxColor.WHITE)]
-        (doFor choice choices
-            (window.makeText (Std.string choice) choiceColor
-                (when (Std.string choice)
-                    ->:Void s {
-                        (window.hide)
-                        (onChoice choice)
-                    })
-                noShortcuts))
-        (window.show)
-        window))
+(function :SimpleWindow notify [:String message
+                                    :Void->Void onDismiss
+                                    &opt :FlxColor bgColor
+                                    :FlxColor titleColor
+                                    :FlxColor choiceColor
+                                    :Float percentWidth
+                                    :Float percentHeight
+                                    :Bool xButton
+                                    :String xKey
+                                    :String enterKey]
+    (promptForChoice
+        message
+        ["OK"] 
+        ->_ (onDismiss)
+        bgColor
+        titleColor
+        choiceColor
+        percentWidth
+        percentHeight
+        xButton
+        xKey
+        null
+        null
+        null
+        null
+        enterKey
+        onDismiss))
 
-(function :SimpleWindow promptForString [:String prompt
-                                            :String->Void onChoice
+(function :SimpleWindow promptForChoice <>[T] [:String prompt
+                                            :Array<T> choices
+                                            :T->Void onChoice
                                             &opt :FlxColor bgColor
                                             :FlxColor titleColor
-                                            :FlxColor submitColor
+                                            :FlxColor choiceColor
                                             :Float percentWidth
                                             :Float percentHeight
                                             :Bool xButton
@@ -673,12 +672,41 @@
                                             :String upKey
                                             :String downKey
                                             :String enterKey
-                                            :ShortcutAction onClose]
-    (let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
-            buttonColor (or submitColor FlxColor.WHITE)
-            inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
-        (window.addControl inputText)
-        (window.makeText "{enter} Submit" buttonColor
+                                            :ShortcutAction onClose
+                                            :Bool noShortcuts]
+(let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
+        choiceColor (or choiceColor titleColor FlxColor.WHITE)]
+    (doFor choice choices
+        (window.makeText (Std.string choice) choiceColor
+            (when (Std.string choice)
+                ->:Void s {
+                    (window.hide)
+                    (onChoice choice)
+                })
+            noShortcuts))
+    (window.show)
+    window))
+
+(function :SimpleWindow promptForString [:String prompt
+                                        :String->Void onChoice
+                                        &opt :FlxColor bgColor
+                                        :FlxColor titleColor
+                                        :FlxColor submitColor
+                                        :Float percentWidth
+                                        :Float percentHeight
+                                        :Bool xButton
+                                        :String xKey
+                                        :String leftKey
+                                        :String rightKey
+                                        :String upKey
+                                        :String downKey
+                                        :String enterKey
+                                        :ShortcutAction onClose]
+(let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
+        buttonColor (or submitColor FlxColor.WHITE)
+        inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
+    (window.addControl inputText)
+    (window.makeText "{enter} Submit" buttonColor
             ->:Void s {
                 (window.hide)
                 (onChoice inputText.text)
