@@ -377,6 +377,18 @@ class KissInputText extends FlxText
 
 				if (newText.length > 0 && (maxLength == 0 || (text.length + newText.length) < maxLength))
 				{
+					// Remove previous lines from the textField's text when checking for overflow:
+					var textFieldText = textField.text;
+					textField.text = textField.text.substr(0, caretIndex).split("\n").pop();
+
+					if (textField.textWidth > (width - 4 - textField.textHeight)) {
+						textField.text = textFieldText; 
+						text = insertSubstring(text, "\n", caretIndex);
+						caretIndex++;
+					} else {
+						textField.text = textFieldText; 
+					}
+
 					text = insertSubstring(text, newText, caretIndex);
 					caretIndex++;
 					onChange(INPUT_ACTION);
@@ -498,7 +510,7 @@ class KissInputText extends FlxText
 				lastW = 0;
 				continue;
 			}
-			textW = textField.textWidth; // count up total text width
+			textW = textField.textWidth; // count up total text width of this line
 			_charBoundaries[i].x = magicX + lastW; // place x at end of last character
 			_charBoundaries[i].y = magicY + lastH; // place y at end of last line
 			_charBoundaries[i].width = (textW - lastW); // place width at (width so far) minus (last char's end point)
