@@ -1,0 +1,85 @@
+(var &mut serverAddress "http://localhost:3001/")
+(var &mut promiseToAnonymize false)
+
+(defNew [:Void->Void onClose
+            &opt :FlxColor bgColor
+            :FlxColor textColor
+            :Bool xButton :String xKey]
+
+    [:KissInputText inputText (new KissInputText 0 0 (* 2 (fThird FlxG.width)) "" SimpleWindow.textSize)]
+
+    (super "FEEDBACK" bgColor textColor 1 1 xButton xKey "" "" "" "" "" onClose)
+    
+    (makeText "")
+
+    (makeWrappedText "Describe something that went wrong, things you liked or disliked, or anything you would like to see added, in as much detail as possible:" null true)
+    
+    (makeText "")
+
+    (defAlias &ident LINES 20)
+    (set inputText.lines LINES)
+    (prop &mut :Float lastHeight 0)
+    (set lastHeight inputText.height)
+    (prop &mut inputTextIndex 0)
+    (set inputTextIndex .length (getColumnControls))
+    (set inputText.callback ->:Void [_ event] {
+        (when (= event "enter")
+            (let [ci inputText.caretIndex
+                    pre (inputText.text.substr 0 ci)
+                    post (inputText.text.substr ci)]
+                (set inputText.text "${pre}\n ${post}")
+                (+= inputText.caretIndex 2))
+            (return))
+        (unless (= lastHeight inputText.height)
+            (let [heightChange (- inputText.height lastHeight)]
+                (doFor text (.slice (getColumnControls) (+ 1 inputTextIndex))
+                    (+= text.y heightChange))))
+
+        (set lastHeight inputText.height)
+    })
+
+    (addControl inputText)
+
+    (makeText "")
+
+    (makeWrappedText "When you click 'Send' your feedback will be delivered anonymously, along with a log of your session.$?(when promiseToAnonymize " No identifying information is recorded in the log.")" null true)
+    (makeWrappedText "You agree that your feedback can be used in ANY way the developer sees fit." null true)
+
+    (makeText "")
+
+    (makeText "Send" null ->:Void _ {
+        (let [request (new HTTPRequest<Dynamic> serverAddress)]
+            
+            (set request.contentType "text/plain")
+            (set request.data
+                (Bytes.ofString "Feedback:\n${inputText.text}\n\nLog:\n\n$(File.getContent "log.txt")"))
+            (set request.method "POST")
+            (localVar timeout 3)
+            (set request.timeout 3)
+            
+            (set request.enableResponseHeaders true)
+            
+            (makeText "Sending...")
+
+            (localFunction errorMessage [:Dynamic e]
+                (SimpleWindow.notify "Failed to send. Please try again later." ->:Void {(hide)(onClose)})
+                (print "Failed to send feedback! Error:")
+                (print e))
+
+            (let [future (request.load)
+                    _ (future.onError errorMessage)
+                    _ (future.onComplete ->:Void _ 
+                        (let [body (request.responseData.toString)]
+                            (if (= body "received")
+                                    (SimpleWindow.notify "Your feedback has been received!" ->:Void {(hide)(onClose)})            
+                                (errorMessage "result was $body"))))
+                    ]
+                (future.ready timeout)))
+    }))
+
+(function :Void collectFeedback [:Void->Void onClose
+                                &opt :FlxColor bgColor
+                                :FlxColor textColor
+                                :Bool xButton
+                                :String xKey]
+    (.show (new FeedbackWindow onClose bgColor textColor xButton xKey)))

@@ -1,24 +1,29 @@
 (import flixel.FlxState)
 (import flixel.text.FlxText)
+(import kiss_flixel.Log)
 (import kiss_flixel.SimpleWindow)
+(import kiss_flixel.FeedbackWindow)
 (extends FlxState)
 
 (method &override :Void create []
     (super.create)
     
+    (Log.use)
     (SimpleWindow.sensibleDefaultKeys)
     (set SimpleWindow.defaultSelectionMarker (new FlxText 0 0 ">" SimpleWindow.textSize))
 
     (showMenu))
 
-(method showMenu []
-    (SimpleWindow.promptForChoice "Testing SimpleWindow" ["Vertical" "Menu" "Quit"]
+(method :Void showMenu []
+    (SimpleWindow.promptForChoice "Testing SimpleWindow" ["Vertical" "Menu" "Feedback" "Quit"]
         ->:Void choice 
             (case choice
                 ("Vertical"
                     (verticalMenu))
                 ("Menu"
                     (subMenu))
+                ("Feedback"
+                    (FeedbackWindow.collectFeedback showMenu))
                 ("Quit"
                     (Sys.exit 0))
                 (never otherwise))))
