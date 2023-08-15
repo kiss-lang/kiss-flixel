@@ -18,6 +18,6 @@
 
 (function use []
     (set Prelude.printStr log)
-    (let [msg "Launching version $(gitVersion) on $(.toString (Date.now))"
+    (let [msg "Launching version $(gitVersion) for $(Sys.systemName) on $(.toString (Date.now))"
             divider (* msg.length "-")]
         (log "${divider}\n${msg}\n${divider}")))
