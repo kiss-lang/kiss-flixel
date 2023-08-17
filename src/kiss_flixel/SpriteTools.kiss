@@ -62,11 +62,15 @@
             (set bytes (bitmapData.encode bitmapData.rect (new PNGEncoderOptions true) bytes))
                 (File.saveBytes file bytes))))
 
-(function :FlxSprite textPlate [:String text :Int size :Int margin &opt :FlxColor textColor :FlxColor bgColor :FlxText->FlxText applyFormat]
+(function :FlxSprite textPlate [:String text :Int size :Int margin &opt :FlxColor textColor :FlxColor bgColor :FlxText->FlxText applyFormat :String fontPath]
     (unless applyFormat (set applyFormat ->text text))
     (unless textColor (set textColor FlxColor.WHITE))
     (unless bgColor (set bgColor FlxColor.BLACK))
-    (let [flxText (applyFormat (new FlxText 0 0 0 text size))
+    (let [flxText (new FlxText 0 0 0 text size)
+            flxText (if fontPath
+                            (flxText.setFormat fontPath size textColor)
+                        flxText)
+            flxText (applyFormat flxText)
             textWidth flxText.width
             textHeight flxText.height
             plate (new FlxSprite)]
