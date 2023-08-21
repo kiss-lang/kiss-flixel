@@ -79,6 +79,10 @@
         (plate.stamp flxText margin margin)
         plate))
 
+(function :FlxSprite cloneUnique [:FlxSprite sprite]
+    (let [s (sprite.clone)]
+        (s.loadGraphic s.graphic false 0 0 true)))
+
 (var &mut _idx 0)
 (function :Void logSprites [&opt :FlxGroup group :String tab]
     (unless group
