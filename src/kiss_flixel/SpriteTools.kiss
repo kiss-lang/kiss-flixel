@@ -84,20 +84,39 @@
         (s.loadGraphic s.graphic false 0 0 true)))
 
 (var &mut _idx 0)
-(function :Void logSprites [&opt :FlxGroup group :String tab]
-    (unless group
+(function :Void logSprites [&opt :flixel.FlxCamera _camera :FlxGroup group :String tab]
+    (unless _camera
         (print "Logging Sprites")
         (print "###############")
+        (let [cameras (enumerate (filter FlxG.cameras.list))]
+            (doFor [idx camera] cameras
+                (print "Camera #${idx} (${camera.x}, ${camera.y}, ${camera.width}x${camera.height})")
+                (print "bgColor: ${camera.bgColor}")
+                (print "--------------")
+                (logSprites camera null ""))
+            (return)))
+    (unless group
         (set _idx 0)
         (set group FlxG.state)
         (set tab ""))
     (group.forEach
         ->:Void obj 
-            (typeCase [obj]
-                ([:FlxSprite sprite]
-                    (print "${tab}${_idx++}. ${sprite}"))
-                ([:FlxTypedGroup<FlxBasic> innerGroup]
-                    (logSprites innerGroup "${tab}|   "))
-                (otherwise
-                    (print "${tab}${_idx++}. Unknown type"))))
+            (cond
+                ((let [cameras (or obj.cameras (Reflect.field FlxG.cameras "defaults"))]
+                    (cameras.contains _camera))
+
+                    (typeCase [obj]
+                        ([:FlxText text]
+                            (print "${tab}${_idx++}. ${text.text}"))
+                        ([:FlxSprite sprite]
+                            (print "${tab}${_idx++}. ${sprite}"))
+                        ([:DebugLayer innerGroup]
+                            (print "${tab}DebugLayer:")
+                            (logSprites _camera (cast innerGroup) "${tab}|   "))
+                        ([:FlxTypedGroup<FlxBasic> innerGroup]
+                            (logSprites _camera innerGroup "${tab}|   "))
+                        (otherwise
+                            (print "${tab}${_idx++}. Unknown type"))))
+                (true
+                    (+= _idx 1))))
     (print "${tab}---------------"))
