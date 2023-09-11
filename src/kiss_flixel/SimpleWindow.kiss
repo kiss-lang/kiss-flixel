@@ -456,16 +456,16 @@
         (set ftext.color (or color textColor))
         (dictSet _colors ftext ftext.color)
         (addControl ftext)
+        (when onSelect
+            (dictSet _onSelectEvents ftext onSelect))
+        (when onDeselect
+            (dictSet _onDeselectEvents ftext onDeselect))
         (when onClick
             (dictSet _actions ftext onClick)
             (unless noShortcut
                 (keyHandler.registerItem text ->:Void (onClick ftext)))
             (when (and selectFirstInteractiveControl (= -1 _selectedIndex))
                 (set selectedIndex (.indexOf (getColumnControls) ftext))))
-        (when onSelect
-            (dictSet _onSelectEvents ftext onSelect))
-        (when onDeselect
-            (dictSet _onDeselectEvents ftext onDeselect))
         ftext))
 
 (method makeWrappedText [:String _text &opt :FlxColor color :Bool skipScrollingCheck]
