@@ -89,7 +89,7 @@
         (set buf (new StringBuf)))
     (localFunction _print [:String text]
         (print text)
-        (buf.add text))
+        (buf.add "${text}\n"))
     (unless _camera
         (_print "Logging Sprites")
         (_print "###############")
