@@ -42,7 +42,11 @@
                             gamepadId)]
                 // capture the fake JUST_PRESSED event harmlessly
                 (action.update)
-                (set action.callback ->:Void _ (handleKey keyString))
+                (set action.callback ->:Void _ {
+                    (when (FlxG.gamepads.anyJustPressed buttonId)
+                        (print "$buttonId")
+                        (handleKey keyString))
+                })
                 action))))
 
 (method :Void update []
