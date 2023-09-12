@@ -84,17 +84,22 @@
         (s.loadGraphic s.graphic false 0 0 true)))
 
 (var &mut _idx 0)
-(function :Void logSprites [&opt :flixel.FlxCamera _camera :FlxGroup group :String tab]
+(function :String logSprites [&opt :flixel.FlxCamera _camera :FlxGroup group :String tab :StringBuf buf]
+    (unless buf
+        (set buf (new StringBuf)))
+    (localFunction _print [:String text]
+        (print text)
+        (buf.add text))
     (unless _camera
-        (print "Logging Sprites")
-        (print "###############")
+        (_print "Logging Sprites")
+        (_print "###############")
         (let [cameras (enumerate (filter FlxG.cameras.list))]
             (doFor [idx camera] cameras
-                (print "Camera #${idx} (${camera.x}, ${camera.y}, ${camera.width}x${camera.height})")
-                (print "bgColor: ${camera.bgColor}")
-                (print "--------------")
-                (logSprites camera null ""))
-            (return)))
+                (_print "Camera #${idx} (${camera.x}, ${camera.y}, ${camera.width}x${camera.height})")
+                (_print "bgColor: ${camera.bgColor}")
+                (_print "--------------")
+                (logSprites camera null "" buf))
+            (return (buf.toString))))
     (unless group
         (set _idx 0)
         (set group FlxG.state)
@@ -107,16 +112,20 @@
 
                     (typeCase [obj]
                         ([:FlxText text]
-                            (print "${tab}${_idx++}. ${text.text}"))
+                            (_print "${tab}${_idx++}. ${text.text} $(spriteToString text)"))
                         ([:FlxSprite sprite]
-                            (print "${tab}${_idx++}. ${sprite}"))
+                            (_print "${tab}${_idx++}. $(spriteToString sprite)"))
                         ([:DebugLayer innerGroup]
-                            (print "${tab}DebugLayer:")
-                            (logSprites _camera (cast innerGroup) "${tab}|   "))
+                            (_print "${tab}DebugLayer:")
+                            (logSprites _camera (cast innerGroup) "${tab}|   " buf))
                         ([:FlxTypedGroup<FlxBasic> innerGroup]
-                            (logSprites _camera innerGroup "${tab}|   "))
+                            (logSprites _camera innerGroup "${tab}|   " buf))
                         (otherwise
-                            (print "${tab}${_idx++}. Unknown type"))))
+                            (_print "${tab}${_idx++}. Unknown type"))))
                 (true
                     (+= _idx 1))))
-    (print "${tab}---------------"))
+    (_print "${tab}---------------")
+    "")
+
+(function spriteToString [:FlxSprite sprite]
+    "{${sprite.graphic.assetsKey} at (${sprite.x},${sprite.y}) with origin (${sprite.origin.x},${sprite.origin.y}), angle ${sprite.angle}, scale (${sprite.scale.x},${sprite.scale.y}), size ${sprite.width}x${sprite.height}, alpha ${sprite.alpha}, frame ${sprite.animation?.frameIndex}}")
