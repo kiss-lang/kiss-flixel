@@ -84,11 +84,13 @@
         (s.loadGraphic s.graphic false 0 0 true)))
 
 (var &mut _idx 0)
+(var &mut doPrint true)
 (function :String logSprites [&opt :flixel.FlxCamera _camera :FlxGroup group :String tab :StringBuf buf]
     (unless buf
         (set buf (new StringBuf)))
     (localFunction _print [:String text]
-        (print text)
+        (when doPrint
+            (print text))
         (buf.add "${text}\n"))
     (unless _camera
         (_print "Logging Sprites")
@@ -136,10 +138,12 @@
 (#when sys
     // Successive runs of this program will assert that the layout and order of sprites stays the same. Must pass in a unique constant logFile path
     (function :Void assertLogSprites [:String logFile]
+        (set doPrint false)
         (if (sys.FileSystem.exists logFile)
                 (let [actual (logSprites)]
                     (sys.io.File.saveContent "${logFile}.actual" actual)
                     (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr)
                     (sys.FileSystem.deleteFile "${logFile}.actual")
                     (assertEquals (StringTools.replace (sys.io.File.getContent logFile) "\r" "") actual))
-            (sys.io.File.saveContent logFile (logSprites)))))
+            (sys.io.File.saveContent logFile (logSprites)))
+        (set doPrint true)))
