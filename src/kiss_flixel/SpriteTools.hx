@@ -15,6 +15,7 @@ import flash.utils.ByteArray;
 import sys.io.File;
 #end
 import kiss_flixel.DebugLayer;
+import kiss_flixel.SimpleWindow;
 
 enum RelativeCoordinate {
     // Negative means to count back from the far edge

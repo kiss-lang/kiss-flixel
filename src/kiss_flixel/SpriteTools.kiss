@@ -115,6 +115,8 @@
                     (typeCase [obj]
                         ([:FlxText text]
                             (_print "${tab}${_idx++}. ${text.text} $(spriteToString text)"))
+                        ([:SimpleWindow window]
+                            (_print "${tab}SimpleWindow '${window.title}': $(spriteToString window)"))
                         ([:FlxSprite sprite]
                             (_print "${tab}${_idx++}. $(spriteToString sprite)"))
                         ([:DebugLayer innerGroup]
