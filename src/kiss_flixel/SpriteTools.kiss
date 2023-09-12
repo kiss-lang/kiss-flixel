@@ -116,18 +116,18 @@
                         ([:FlxText text]
                             (_print "${tab}${_idx++}. ${text.text} $(spriteToString text)"))
                         ([:SimpleWindow window]
-                            (_print "${tab}SimpleWindow '${window.title}': $(spriteToString window)"))
+                            (_print "${tab}${_idx++}. SimpleWindow '${window.title}': $(spriteToString window)"))
                         ([:FlxSprite sprite]
                             (_print "${tab}${_idx++}. $(spriteToString sprite)"))
                         ([:DebugLayer innerGroup]
-                            (_print "${tab}DebugLayer:")
+                            (_print "${tab}${_idx++}. DebugLayer:")
                             (logSprites _camera (cast innerGroup) "${tab}|   " buf))
                         ([:FlxTypedGroup<FlxBasic> innerGroup]
                             (logSprites _camera innerGroup "${tab}|   " buf))
                         (otherwise
-                            (_print "${tab}${_idx++}. Unknown type"))))
+                            (_print "${tab}${_idx++}. Unhandled type $(Type.getClassName (Type.getClass obj))"))))
                 (true
-                    (+= _idx 1))))
+                    null)))
     (_print "${tab}---------------")
     "")
 
