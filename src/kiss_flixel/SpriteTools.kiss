@@ -137,5 +137,9 @@
     // Successive runs of this program will assert that the layout and order of sprites stays the same. Must pass in a unique constant logFile path
     (function :Void assertLogSprites [:String logFile]
         (if (sys.FileSystem.exists logFile)
-                (assertEquals (StringTools.replace (sys.io.File.getContent logFile) "\r" "") (logSprites))
+                (let [actual (logSprites)]
+                    (sys.io.File.saveContent "${logFile}.actual" actual)
+                    (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr)
+                    (sys.FileSystem.deleteFile "${logFile}.actual")
+                    (assertEquals (StringTools.replace (sys.io.File.getContent logFile) "\r" "") actual))
             (sys.io.File.saveContent logFile (logSprites)))))
