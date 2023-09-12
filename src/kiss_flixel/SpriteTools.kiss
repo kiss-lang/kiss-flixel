@@ -127,5 +127,15 @@
     (_print "${tab}---------------")
     "")
 
-(function spriteToString [:FlxSprite sprite]
-    "{${sprite.graphic.assetsKey} at (${sprite.x},${sprite.y}) with origin (${sprite.origin.x},${sprite.origin.y}), angle ${sprite.angle}, scale (${sprite.scale.x},${sprite.scale.y}), size ${sprite.width}x${sprite.height}, alpha ${sprite.alpha}, frame ${sprite.animation?.frameIndex}}")
+(var FLIPPED_X ", flipped horizontally")
+(var FLIPPED_Y ", flipped vertically")
+(function :String spriteToString [:FlxSprite sprite]
+    (localVar flipInfo "$?(when sprite.flipX FLIPPED_X)$?(when sprite.flipY FLIPPED_Y)")
+    "{${sprite.graphic.assetsKey} at (${sprite.x},${sprite.y}) with origin ${sprite.origin}, angle ${sprite.angle}, scale ${sprite.scale}, size ${sprite.width}x${sprite.height}, alpha ${sprite.alpha}, frame ${sprite.animation?.frameIndex}}$flipInfo")
+
+(#when sys
+    // Successive runs of this program will assert that the layout and order of sprites stays the same. Must pass in a unique constant logFile path
+    (function :Void assertLogSprites [:String logFile]
+        (if (sys.FileSystem.exists logFile)
+                (assertEquals (StringTools.replace (sys.io.File.getContent logFile) "\r" "") (logSprites))
+            (sys.io.File.saveContent logFile (logSprites)))))
