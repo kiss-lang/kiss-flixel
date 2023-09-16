@@ -707,10 +707,13 @@
                                         :String upKey
                                         :String downKey
                                         :String enterKey
-                                        :ShortcutAction onClose]
-(let [window (new SimpleWindow prompt bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
+                                        :ShortcutAction onClose
+                                        :Bool wrapPrompt]
+(let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
         buttonColor (or submitColor FlxColor.WHITE)
         inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
+    (when wrapPrompt
+        (window.makeWrappedText prompt titleColor true))
     (window.addControl inputText)
     (window.makeText "{enter} Submit" buttonColor
             ->:Void s {
