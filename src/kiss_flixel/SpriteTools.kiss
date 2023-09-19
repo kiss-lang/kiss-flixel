@@ -140,14 +140,25 @@
     "{${sprite.graphic.assetsKey} at (${sprite.x},${sprite.y}) with origin ${sprite.origin}, angle ${sprite.angle}, scale ${sprite.scale}, size ${sprite.width}x${sprite.height}, alpha ${sprite.alpha}, frame ${sprite.animation?.frameIndex}}$flipInfo")
 
 (#when sys
+    (function :Void warnLogSprites [:String logFile]
+        (assertLogSprites logFile true))
+
     // Successive runs of this program will assert that the layout and order of sprites stays the same. Must pass in a unique constant logFile path
-    (function :Void assertLogSprites [:String logFile]
+    (function :Void assertLogSprites [:String logFile &opt :Bool warnOnly]
         (set doPrint false)
         (if (sys.FileSystem.exists logFile)
-                (let [actual (logSprites)]
-                    (sys.io.File.saveContent "${logFile}.actual" actual)
+                (let [expectedLog (StringTools.replace (sys.io.File.getContent logFile) "\r" "")
+                        actualLog (logSprites)]
+                    (sys.io.File.saveContent "${logFile}.actual" actualLog)
                     (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr)
                     (sys.FileSystem.deleteFile "${logFile}.actual")
-                    (assertEquals (StringTools.replace (sys.io.File.getContent logFile) "\r" "") actual))
+                    (if warnOnly
+                            (unless (= expectedLog actualLog)
+                                (print "Warning! Expected and actual sprite logs are not the same. Install delta for a readable diff")
+                                (print "expected:")
+                                (print expectedLog)
+                                (print "actual:")
+                                (print actualLog))
+                        (assertEquals expectedLog actualLog)))
             (sys.io.File.saveContent logFile (logSprites)))
         (set doPrint true)))
