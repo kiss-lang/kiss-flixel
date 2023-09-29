@@ -10,14 +10,17 @@
         (sys
             (#when debug
                 (Sys.println s))
-            (let [file (sys.io.File.append "log.txt" false)]
+            (let [file (sys.io.File.append logFile false)]
                 (file.writeString "${s}\n")
                 (file.close)))
         (true
             (haxe.Log.trace s))))
 
+// Store the absolute path of the log file in case the program needs to change cwd:
+(var &mut logFile "")
 (function use []
     (set Prelude.printStr log)
+    (set logFile (joinPath (Sys.getCwd) "log.txt"))
     (let [msg "Launching version $(gitVersion) for $(Sys.systemName) on $(.toString (Date.now))"
             divider (* msg.length "-")]
         (log "${divider}\n${msg}\n${divider}")))
