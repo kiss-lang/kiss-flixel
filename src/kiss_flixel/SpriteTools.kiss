@@ -147,10 +147,10 @@
     (function :Void assertLogSprites [:String logFile &opt :Bool warnOnly]
         (set doPrint false)
         (if (sys.FileSystem.exists logFile)
-                (let [expectedLog (StringTools.replace (sys.io.File.getContent logFile) "\r" "")
-                        actualLog (logSprites)]
+                (let [expectedLog (StringTools.trim (StringTools.replace (sys.io.File.getContent logFile) "\r" ""))
+                        actualLog (StringTools.trim (logSprites))]
                     (sys.io.File.saveContent "${logFile}.actual" actualLog)
-                    (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr)
+                    (#unless windows (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr))
                     (sys.FileSystem.deleteFile "${logFile}.actual")
                     (if warnOnly
                             (unless (= expectedLog actualLog)
