@@ -55,6 +55,16 @@
             (otherwise))
         value))
 
+(method :Void setControlColor [:FlxSprite control :FlxColor newColor]
+    (unless control (return))
+
+    (set control.color newColor)
+    (dictSet _colors control newColor))
+
+(method :Void setUIControlColor [:FlxColor newColor]
+    (doFor control [xText leftText rightText upText downText scrollBar]
+        (setControlColor control newColor)))
+
 (method selectDown []
     (let [columnControls (getColumnControls)
             &mut nextIndex _selectedIndex]
