@@ -149,16 +149,19 @@
         (if (sys.FileSystem.exists logFile)
                 (let [expectedLog (StringTools.trim (StringTools.replace (sys.io.File.getContent logFile) "\r" ""))
                         actualLog (StringTools.trim (logSprites))]
-                    (sys.io.File.saveContent "${logFile}.actual" actualLog)
-                    (#unless windows (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr))
-                    (sys.FileSystem.deleteFile "${logFile}.actual")
-                    (if warnOnly
-                            (unless (= expectedLog actualLog)
-                                (print "Warning! Expected and actual sprite logs are not the same. Install delta for a readable diff")
-                                (print "expected:")
-                                (print expectedLog)
-                                (print "actual:")
-                                (print actualLog))
-                        (assertEquals expectedLog actualLog)))
+                    (unless (= expectedLog actualLog)
+                        (#when (and linux debug)
+                            (sys.io.File.saveContent "${logFile}.actual" actualLog)
+                            (tryProcess "delta" [logFile "${logFile}.actual"] Prelude.printStr)
+                            (sys.FileSystem.deleteFile "${logFile}.actual"))
+                        (if warnOnly
+                                {
+                                    (print "Warning! Expected and actual sprite logs are not the same. Install delta for a readable diff")
+                                    (print "expected:")
+                                    (print expectedLog)
+                                    (print "actual:")
+                                    (print actualLog)
+                                }
+                            (assertEquals expectedLog actualLog))))
             (sys.io.File.saveContent logFile (logSprites)))
         (set doPrint true)))
