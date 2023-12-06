@@ -124,8 +124,8 @@ class DragToSelectPlugin extends FlxBasic {
                         dragState.firstCorner = null;
                         for (s in dragState.enabledSprites) {
                             var scaledWorldRect = s.getScreenBounds(camera);
-                            scaledWorldRect.x += camera.viewLeft;
-                            scaledWorldRect.y += camera.viewTop;
+                            scaledWorldRect.x += camera.scroll.x;
+                            scaledWorldRect.y += camera.scroll.y;
                             var intersection = scaledWorldRect.intersection(rect);
                             if (!intersection.isEmpty) {
                                 // if pixel perfect is true, get the pixels in the intersection and hit test them for transparency
