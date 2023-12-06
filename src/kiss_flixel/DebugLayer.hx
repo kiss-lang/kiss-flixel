@@ -58,7 +58,7 @@ class DebugLayer extends FlxTypedGroup<FlxSprite> {
             add(s);
         }
 
-        s.drawRect(thickness/2, thickness/2, Width, Height, FlxColor.TRANSPARENT, {color: outlineColor, thickness: thickness});
+        s.drawRect(X - s.x + thickness/2, Y - s.y + thickness/2, Width, Height, FlxColor.TRANSPARENT, {color: outlineColor, thickness: thickness});
         return s;
     }
 
@@ -76,7 +76,7 @@ class DebugLayer extends FlxTypedGroup<FlxSprite> {
             s.mg(2 * (radius + thickness), 2 * (radius + thickness));
             add(s);
         }
-        s.drawCircle(s.width / 2, s.height / 2, FlxColor.TRANSPARENT, {color:color, thickness:thickness});
+        s.drawCircle(x - s.x + s.width / 2, y - s.y + s.height / 2, FlxColor.TRANSPARENT, {color:color, thickness:thickness});
         return s;
     }
 
