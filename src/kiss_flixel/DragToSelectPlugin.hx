@@ -123,14 +123,17 @@ class DragToSelectPlugin extends FlxBasic {
                     if (FlxG.mouse.justReleased && dragState.selectedSprites.length == 0) {
                         dragState.firstCorner = null;
                         for (s in dragState.enabledSprites) {
-                            if (s.scale.x != 1 || s.scale.y != 1) {
-                                throw "DragToSelectPlugin can't handle scaled sprites yet!";
-                            }
-                            var intersection = s.getRotatedBounds().intersection(rect);
+                            var scaledWorldRect = s.getScreenBounds(camera);
+                            scaledWorldRect.x += camera.viewLeft;
+                            scaledWorldRect.y += camera.viewTop;
+                            var intersection = scaledWorldRect.intersection(rect);
                             if (!intersection.isEmpty) {
-                                // TODO if pixel perfect is true, get the pixels in the intersection and hit test them for transparency
+                                // if pixel perfect is true, get the pixels in the intersection and hit test them for transparency
                                 var pixelPerfectCheck = false;
                                 if (s.pixelPerfectDrag()) {
+                                    if (s.scale.x != 1 || s.scale.y != 1) {
+                                        throw "DragToSelectPlugin can't do pixel-perfect handling of scaled sprites!";
+                                    }
                                     var alpha = s.pixelPerfectAlpha();
                                     s.updateFramePixels();
                                     var intersectionInFrame = new Rectangle(Std.int(intersection.x - s.x), Std.int(intersection.y - s.y), Math.min(s.framePixels.width, Std.int(intersection.width)), Math.min(s.framePixels.height, Std.int(intersection.height)));
