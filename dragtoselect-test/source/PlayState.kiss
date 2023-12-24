@@ -2,6 +2,7 @@
 (import flixel.FlxState)
 (import kiss_flixel.KissExtendedSprite)
 (import flixel.util.FlxColor)
+(import flixel.math.FlxRect)
 (import flixel.addons.plugin.FlxMouseControl)
 
 (extends FlxState)
@@ -12,6 +13,7 @@
     (let [sprites (for i (range 3)
                         (new KissExtendedSprite (* i 150) 0))]
         (doFor s sprites
+            (set s.boundsRect (new FlxRect 0 0 FlxG.width FlxG.height))
             (s.makeGraphic 100 100 FlxColor.WHITE)
             (s.enableMouseDrag false)
             (s.enableDragToSelect)
