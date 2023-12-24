@@ -183,6 +183,16 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
             var nextPos = startPos.copyTo().addPoint(spriteTotalMovement);
             sprite.x = nextPos.x;
             sprite.y = nextPos.y;
+
+            if (sprite.boundsRect != null)
+            {
+                sprite.checkBoundsRect();
+            }
+
+            if (sprite.boundsSprite != null)
+            {
+                sprite.checkBoundsSprite();
+            }
         }
     }
 
