@@ -161,9 +161,6 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
         var mouseTotalMovement = FlxG.mouse.getWorldPosition().subtractPoint(mouseStartPos);
         var nextPos = dragStartPos.copyTo().addPoint(mouseTotalMovement);
         
-        var lastX = x;
-        var lastY = y;
-
         x = nextPos.x;
         y = nextPos.y;
 
@@ -177,7 +174,7 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
 			checkBoundsSprite();
 		}
 
-        var spriteTotalMovement = new FlxPoint(x - lastX, y - lastY);
+        var spriteTotalMovement = new FlxPoint(x - dragStartPos.x, y - dragStartPos.y);
 
         var l = connectedAndSelectedSprites();
         for (i in 0...l.length) {
