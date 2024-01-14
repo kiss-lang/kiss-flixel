@@ -7,4 +7,5 @@
 -lib openfl
 -cp ${SCOPE_DIR}/..//src/
 -D kiss-flixel=0.0.0
+${SCOPE_DIR}/..//extraParams.hxml
 --macro Sys.println("haxe_libraries/kiss-flixel.hxml:9: [Warning] Using dev version of library kiss-flixel")
