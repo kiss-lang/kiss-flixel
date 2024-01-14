@@ -1,0 +1,20 @@
+(import flixel.FlxState)
+(import flixel.FlxG)
+(import flixel.FlxSprite)
+(import openfl.filters.BitmapFilter)
+(import openfl.filters.ShaderFilter)
+
+(extends FlxState)
+
+(method &override :Void create []
+    (super.create)
+    (let [bg (new FlxSprite 0 0 "assets/images/apTestRoomEdited.jpg")]
+        (bg.setGraphicSize FlxG.width FlxG.height)
+        (bg.screenCenter)
+        (add bg))
+    (let [:BitmapFilter filter (new ShaderFilter (new CShader))
+            :Array<BitmapFilter> filters [filter]]
+        (FlxG.camera.setFilters filters)))
+
+(method &override :Void update [:Float elapsed]
+    (super.update elapsed))

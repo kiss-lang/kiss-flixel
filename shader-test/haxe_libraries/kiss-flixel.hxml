@@ -1,0 +1,10 @@
+-lib kiss
+-lib kiss-tools
+-lib flixel
+-lib flixel-addons
+-lib flixel-ui
+-lib lime
+-lib openfl
+-cp ${SCOPE_DIR}/..//src/
+-D kiss-flixel=0.0.0
+--macro Sys.println("haxe_libraries/kiss-flixel.hxml:9: [Warning] Using dev version of library kiss-flixel")
