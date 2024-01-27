@@ -6,15 +6,22 @@
 
 (extends FlxState)
 
+(prop &mut shader null)
+
 (method &override :Void create []
     (super.create)
     (let [bg (new FlxSprite 0 0 "assets/images/apTestRoomEdited.jpg")]
         (bg.setGraphicSize FlxG.width FlxG.height)
         (bg.screenCenter)
         (add bg))
-    (let [:BitmapFilter filter (new ShaderFilter (new CShader))
+    (set shader (new CShader))
+    (set shader.data.invert.value [true])
+    (let [:BitmapFilter filter (new ShaderFilter shader)
             :Array<BitmapFilter> filters [filter]]
         (FlxG.camera.setFilters filters)))
 
 (method &override :Void update [:Float elapsed]
-    (super.update elapsed))
+    (super.update elapsed)
+
+    (when FlxG.keys.justPressed.SPACE
+        (set shader.data.invert.value [!(first shader.data.invert.value)])))
