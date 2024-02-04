@@ -7,6 +7,7 @@ import haxe.macro.Expr.ImportMode;
 import kiss.Stream;
 
 using StringTools;
+using haxe.io.Path;
 using tink.MacroApi;
 
 class ShaderFrontend implements FrontendPlugin {
@@ -20,7 +21,7 @@ class ShaderFrontend implements FrontendPlugin {
 	}
 
 	public function parse(file:String, context:FrontendContext):Void {
-		var extension = file.substr(file.indexOf(".") + 1);
+		var extension = file.withoutDirectory().substr(file.withoutDirectory().indexOf(".") + 1);
 		trace(extension);
 
 		final type = context.getType();
