@@ -36,8 +36,11 @@ class ShaderFrontend implements FrontendPlugin {
             throw 'Error transforming shader code! $reason';
         }
 
-		// Supply ShaderToy-esque iTime
+		// Supply some useful properties, updated every frame:
+		// * ShaderToy-esque iTime
+		// * Camera position (cameraPos)
 		transformedCode += 'uniform float iTime = 0.0;\n';
+		transformedCode += 'uniform vec2 cameraPos = vec2(0.0, 0.0);\n';
 		type.fields.push({
 			pos: pos,
 			name: "__update",
@@ -46,9 +49,16 @@ class ShaderFrontend implements FrontendPlugin {
 				expr: macro {
 					super.__update();
 					data.iTime.value = [data.iTime.value[0] + flixel.FlxG.elapsed];
+					data.cameraPos.value = [camera.scroll.x, camera.scroll.y];
 				}
 			}),
 			access: [APublic, AOverride]
+		});
+		type.fields.push({
+			pos: pos,
+			name: "camera",
+			kind: FVar(kiss.Helpers.parseComplexType("flixel.FlxCamera"), macro null),
+			access: [APrivate]
 		});
 
 		// TODO Implement round for the targets that weirdly don't have it
@@ -143,10 +153,18 @@ class ShaderFrontend implements FrontendPlugin {
 			name: "new",
 			meta: [meta],
 			kind: FFun({
-				args: [],
+				args: [{
+					name: "camera",
+					opt: true
+				}],
 				expr: macro {
 					super();
                     data.iTime.value = [0.0];
+					if (camera == null) {
+						camera = flixel.FlxG.camera;
+					}
+					this.camera = camera;
+					data.cameraPos.value = [camera.scroll.x, camera.scroll.y];
 				}
 			}),
 			access: [APublic]
