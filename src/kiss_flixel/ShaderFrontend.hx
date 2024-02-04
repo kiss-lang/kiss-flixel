@@ -135,7 +135,7 @@ class ShaderFrontend implements FrontendPlugin {
 		transformedCode = "#pragma header\n" + transformedCode;
 
 		var metaName = if (vertexExtensions.contains(extension)) ":glVertexSource" else if (fragmentExtensions.contains(extension)) ":glFragmentSource" else
-			throw "Unknown extension";
+			throw 'Unknown extension .${extension}';
 
 		var meta = {
 			pos: pos,
