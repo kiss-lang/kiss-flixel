@@ -40,8 +40,10 @@ class ShaderFrontend implements FrontendPlugin {
 		// Supply some useful properties, updated every frame:
 		// * ShaderToy-esque iTime
 		// * Camera position (cameraPos)
+		// * Camera zoom (cameraZoom)
 		transformedCode += 'uniform float iTime = 0.0;\n';
 		transformedCode += 'uniform vec2 cameraPos = vec2(0.0, 0.0);\n';
+		transformedCode += 'uniform float cameraZoom = 1.0;\n';
 		type.fields.push({
 			pos: pos,
 			name: "__update",
@@ -51,6 +53,7 @@ class ShaderFrontend implements FrontendPlugin {
 					super.__update();
 					data.iTime.value = [data.iTime.value[0] + flixel.FlxG.elapsed];
 					data.cameraPos.value = [camera.scroll.x, camera.scroll.y];
+					data.cameraZoom.value = [camera.zoom];
 				}
 			}),
 			access: [APublic, AOverride]
@@ -63,6 +66,7 @@ class ShaderFrontend implements FrontendPlugin {
 		});
 
 		// TODO Implement round for the targets that weirdly don't have it
+		// TODO give uniforms their default values
 
 		var delimiters = ",.(){}[] \t\n;?:|&<>/*+-'\"=".split("");
 
@@ -166,6 +170,7 @@ class ShaderFrontend implements FrontendPlugin {
 					}
 					this.camera = camera;
 					data.cameraPos.value = [camera.scroll.x, camera.scroll.y];
+					data.cameraZoom.value = [1.0];
 				}
 			}),
 			access: [APublic]

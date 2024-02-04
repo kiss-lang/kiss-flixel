@@ -28,7 +28,7 @@
 
 (method &override :Void update [:Float elapsed]
     (super.update elapsed)
-    (+= FlxG.camera.scroll.x 1)
+    (+= FlxG.camera.zoom 0.01)
 
-    (when FlxG.keys.justPressed.SPACE
+    **(when FlxG.keys.justPressed.SPACE
         (set shader.data.invert.value [!(first shader.data.invert.value)])))

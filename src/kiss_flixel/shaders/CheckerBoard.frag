@@ -10,7 +10,7 @@ void main()
 
     float transparency = 1.0 - color.a;
 
-    vec2 position = openfl_TextureCoordv * iResolution + cameraPos;
+    vec2 position = openfl_TextureCoordv * iResolution / cameraZoom + cameraPos;
     float row = floor(position.y / checkSize);
     float col = floor(position.x / checkSize);
 
