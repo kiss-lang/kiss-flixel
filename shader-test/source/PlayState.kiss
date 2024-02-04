@@ -1,6 +1,7 @@
 (import flixel.FlxState)
 (import flixel.FlxG)
 (import flixel.FlxSprite)
+(import flixel.util.FlxColor)
 (import openfl.filters.BitmapFilter)
 (import openfl.filters.ShaderFilter)
 
@@ -10,9 +11,11 @@
 
 (method &override :Void create []
     (super.create)
+    (set FlxG.camera.bgColor FlxColor.TRANSPARENT)
     (let [bg (new FlxSprite 0 0 "assets/images/apTestRoomEdited.jpg")]
-        (bg.setGraphicSize FlxG.width FlxG.height)
+        (bg.setGraphicSize (iHalf FlxG.width) (iHalf FlxG.height))
         (bg.screenCenter)
+        (set bg.alpha 0.5)
         (add bg))
     (set shader (new kiss_flixel.shaders.CheckerBoard))
     // (set shader.data.invert.value [true])

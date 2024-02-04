@@ -6,6 +6,10 @@ uniform float checkSize = 64;
 
 void main()
 {
+    vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
+
+    float transparency = 1.0 - color.a;
+
     vec2 position = openfl_TextureCoordv * iResolution + cameraPos;
     float row = floor(position.y / checkSize);
     float col = floor(position.x / checkSize);
@@ -16,5 +20,6 @@ void main()
     vec4 oddColor = oddRow ? color1 : color2;
     vec4 evenColor = oddRow ? color2 : color1;
 
-    gl_FragColor = oddCol ? oddColor: evenColor;
+    vec4 bgColor = oddCol ? oddColor: evenColor;
+    gl_FragColor = color + bgColor * transparency;
 }
