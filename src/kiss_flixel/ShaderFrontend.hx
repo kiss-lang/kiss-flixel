@@ -52,7 +52,7 @@ class ShaderFrontend implements FrontendPlugin {
 				expr: macro {
 					super.__update();
 					data.iTime.value = [data.iTime.value[0] + flixel.FlxG.elapsed];
-					data.cameraPos.value = [camera.scroll.x, camera.scroll.y];
+					data.cameraPos.value = [camera.viewLeft, camera.viewTop];
 					data.cameraZoom.value = [camera.zoom];
 				}
 			}),
@@ -169,7 +169,7 @@ class ShaderFrontend implements FrontendPlugin {
 						camera = flixel.FlxG.camera;
 					}
 					this.camera = camera;
-					data.cameraPos.value = [camera.scroll.x, camera.scroll.y];
+					data.cameraPos.value = [camera.viewLeft, camera.viewTop];
 					data.cameraZoom.value = [1.0];
 				}
 			}),
