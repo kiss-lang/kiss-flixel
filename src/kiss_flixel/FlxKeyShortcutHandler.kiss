@@ -35,12 +35,12 @@
     (unless gamepadId (set gamepadId FlxInputDeviceID.ALL))
     (set buttonActions
         (for =>buttonId keyString buttonToKeyMappings
-            (let [action 
+            (let [action
                         (.addGamepad
                             (new FlxActionDigital
                                 "${buttonId}->${keyString}")
                             buttonId
-                            JUST_PRESSED 
+                            JUST_PRESSED
                             gamepadId)]
                 // capture the fake JUST_PRESSED event harmlessly
                 (action.update)
