@@ -19,6 +19,8 @@
     =>"NUMPADSEVEN" "7"
     =>"NUMPADEIGHT" "8"
     =>"NUMPADNINE" "9"
+    =>"PERIOD" "."
+    =>"NUMPADPERIOD" "."
     // TODO there are probably other keys worth converting
 ])
 
