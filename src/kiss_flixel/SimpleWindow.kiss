@@ -5,6 +5,9 @@
 (var :kiss.List<SimpleWindow> windowStack [])
 (var &mut :flixel.FlxCamera defaultCamera null)
 
+(savedVar :Float screenReaderVolume 1.0)
+(savedVar :Bool screenReaderEnabled true)
+
 (prop :FlxCamera controlCamera)
 
 (prop &mut keyboardEnabled true)
@@ -41,7 +44,45 @@
                 (set selectionMarker.y controlToSelect.y)
                 (set selectionMarker.x (- controlToSelect.x selectionMarker.width textSize)))
 
-            // TODO play screenreader of the text
+            // TODO method to play screenreader of all non-interactive text with a cc of playing the first interactive text audio
+
+            // TODO method to prompt explaining the screenreader and optionally asking to enable/disable/configure volume?
+
+            // play screenreader of the text (unless hidden?)
+            (method :Void playScreenReaderTextFor [control &opt :Void->Void cc]
+                (typeCase [control]
+                    ([:FlxText text]
+                        (playScreenReaderText text.text cc))
+                    (otherwise (print "Can't determine text for ScreenReader of SimpleWindow control $control"))))
+
+            (method :Void playScreenReaderText [text &opt :Void->Void cc]
+                // stop any currently playing text
+                // TODO is it right that the cc will never be called?
+                (currentAudio?.stop)
+                
+                (if (and screenReaderEnabled (< 0 screenReaderVolume))
+                        {
+                            (ifLet [audio (dictGet screenReaderAudio text)]
+                                    (playAudio audio cc)
+                                {
+                                    (doFor =>key audio screenReaderAudio
+                                        (when (text.startsWith key)
+                                            (playAudio audio cc)
+                                            (return)))
+                                    (print "No audio found for SimpleWindow text `${text}`")
+                                    (when cc (cc))
+                                })
+                        }
+                    (when cc (cc))))
+
+            (prop &mut :FlxSound currentAudio)
+            (method playAudio [:FlxSound sound &opt :Void->Void cc]
+                (set sound.volume screenReaderVolume)
+                (set sound.onComplete cc)
+                (set currentAudio sound)
+                (sound.play))
+
+            (playScreenReaderTextFor controlToSelect)
 
             (whenLet [onSelect (dictGet _onSelectEvents controlToSelect)]
                 (onSelect controlToSelect))
@@ -110,7 +151,8 @@
             :String _upKey :String _downKey
             :String _enterKey
             :ShortcutAction _onClose
-            :FlxSprite _selectionMarker]
+            :FlxSprite _selectionMarker
+            :String _screenReaderAudioFolder]
     
     [:String title (or _title "")
         &mut :Float nextControlX 0
@@ -132,10 +174,20 @@
         // UI key controls are still available. it also handles left and right.
         :FlxKeyShortcutHandler<ShortcutAction> xHandler (new FlxKeyShortcutHandler)
         :Int _width (Std.int (* FlxG.width (or percentWidth 0.5)))
-        :Int _height (Std.int (* FlxG.height (or percentHeight 0.5)))]
+        :Int _height (Std.int (* FlxG.height (or percentHeight 0.5)))
+        :String screenReaderAudioFolder _screenReaderAudioFolder
+        :Map<String,FlxSound> screenReaderAudio (new Map)]
     
     (assert FlxG.camera "SimpleWindow.new() must be called in or after create()")
     (super 0 0)
+    
+    // TODO this relies on readDirectory() which can't be done in JavaScript for HTML5 games
+    (#when sys
+        (when screenReaderAudioFolder
+            (let [audioFiles (sys.FileSystem.readDirectory screenReaderAudioFolder)]
+                (doFor file audioFiles
+                    (dictSet screenReaderAudio (file.withoutExtension) (FlxG.sound.load (joinPath screenReaderAudioFolder file)))))))
+
     (when defaultCamera (set this.cameras [defaultCamera]))
     (makeGraphic
         _width
@@ -649,7 +701,8 @@
                                     :Float percentHeight
                                     :Bool xButton
                                     :String xKey
-                                    :String enterKey]
+                                    :String enterKey
+                                    :String screenReaderAudioFolder]
     (promptForChoice
         message
         ["OK"] 
@@ -668,7 +721,8 @@
         enterKey
         onDismiss
         false
-        true))
+        true
+        screenReaderAudioFolder))
 
 (function :SimpleWindow promptForChoice <>[T] [:String prompt
                                             :Array<T> choices
@@ -687,8 +741,9 @@
                                             :String enterKey
                                             :ShortcutAction onClose
                                             :Bool noShortcuts
-                                            :Bool wrapPrompt]
-(let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
+                                            :Bool wrapPrompt
+                                            :String screenReaderAudioFolder]
+(let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose defaultSelectionMarker screenReaderAudioFolder)
         choiceColor (or choiceColor titleColor FlxColor.WHITE)]
     (when wrapPrompt
         (window.makeWrappedText prompt titleColor true))
@@ -702,6 +757,8 @@
             noShortcuts))
     (window.show)
     window))
+
+(redefineWithObjectArgs promptForChoice promptForChoiceV2 [prompt choices onChoice])
 
 (function :SimpleWindow promptForString [:String prompt
                                         :String->Void onChoice

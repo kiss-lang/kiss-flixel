@@ -15,7 +15,7 @@
     (showMenu))
 
 (method :Void showMenu []
-    (SimpleWindow.promptForChoice "Testing SimpleWindow" ["Vertical" "Menu" "Feedback" "Quit"]
+    (SimpleWindow.promptForChoiceV2 "Testing SimpleWindow" ["Vertical" "Menu" "Feedback" "Quit"]
         ->:Void choice 
             (case choice
                 ("Vertical"
@@ -26,7 +26,8 @@
                     (FeedbackWindow.collectFeedback showMenu))
                 ("Quit"
                     (Sys.exit 0))
-                (never otherwise))))
+                (never otherwise))
+        (object screenReaderAudioFolder "assets/screen-reader-audio")))
 
 (method subMenu []
     (let [window (new SimpleWindow "SubMenu")]

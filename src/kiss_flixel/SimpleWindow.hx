@@ -9,6 +9,7 @@ import kiss_flixel.KissInputText;
 import flixel.text.FlxText;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
+import flixel.sound.FlxSound;
 import flixel.math.FlxRect;
 import flixel.group.FlxGroup;
 import kiss_flixel.FlxKeyShortcutHandler;
@@ -19,6 +20,9 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.mouse.FlxMouseEvent;
 import kiss_flixel.KissExtendedSprite;
 import flixel.addons.plugin.FlxMouseControl;
+
+using haxe.io.Path;
+using StringTools;
 
 typedef ShortcutAction = Void->Void;
 typedef Action = FlxSprite->Void;
