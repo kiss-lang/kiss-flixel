@@ -55,13 +55,21 @@
                         (playScreenReaderText text.text cc))
                     (otherwise (print "Can't determine text for ScreenReader of SimpleWindow control $control"))))
 
+            (method _withoutForbiddenCharacters [:String text :Array<String> toReplace]
+                (ifLet [next (toReplace.pop)]
+                        (_withoutForbiddenCharacters (text.replace next "") toReplace)
+                    text))
+                    
+            (method withoutForbiddenCharacters [:String text]
+                (_withoutForbiddenCharacters text (.split "#%&{}\\<>*?/\$!'\":@+`|=" "")))
+
             (method :Void playScreenReaderText [text &opt :Void->Void cc]
                 // stop any currently playing text
                 // TODO is it right that the cc will never be called?
                 (currentAudio?.stop)
                 
                 (if (and screenReaderEnabled (< 0 screenReaderVolume))
-                        {
+                        (let [text (withoutForbiddenCharacters text)]
                             (ifLet [audio (dictGet screenReaderAudio text)]
                                     (playAudio audio cc)
                                 {
@@ -71,8 +79,7 @@
                                             (return)))
                                     (print "No audio found for SimpleWindow text `${text}`")
                                     (when cc (cc))
-                                })
-                        }
+                                }))
                     (when cc (cc))))
 
             (prop &mut :FlxSound currentAudio)
