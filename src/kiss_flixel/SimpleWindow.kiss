@@ -26,9 +26,9 @@
         (assert (or (= -1 value) (dictGet _actions controlToSelect) (Std.isOfType controlToSelect KissInputText)))
         
         (when controlToDeselect
-            (set controlToDeselect.color (dictGet _colors controlToDeselect)))
-        (whenLet [onDeselectLast (dictGet _onDeselectEvents controlToDeselect)]
-            (onDeselectLast controlToDeselect))
+            (set controlToDeselect.color (dictGet _colors controlToDeselect))
+            (whenLet [onDeselectLast (dictGet _onDeselectEvents controlToDeselect)]
+                (onDeselectLast controlToDeselect)))
         
         (set _selectedIndex value)
         (when (= -1 value) (return value))
