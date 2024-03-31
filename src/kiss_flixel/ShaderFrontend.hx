@@ -5,13 +5,22 @@ import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Expr.ImportMode;
 import kiss.Stream;
+import kiss.Helpers;
+
+import hscript.Parser;
+import hscript.Interp;
 
 using StringTools;
 using haxe.io.Path;
 using tink.MacroApi;
 
 class ShaderFrontend implements FrontendPlugin {
-	public function new() {}
+	static var hParser = new Parser();
+	static var hInterp = new Interp();
+
+	public function new() {
+		// hInterp.variables["vec3"] = ...;
+	}
 
 	var vertexExtensions = ["v.glsl", "vert"];
 	var fragmentExtensions = ["f.glsl", "frag"];
@@ -66,7 +75,9 @@ class ShaderFrontend implements FrontendPlugin {
 		});
 
 		// TODO Implement round for the targets that weirdly don't have it
-		// TODO give uniforms their default values
+
+		// give uniforms their default values
+		var defaultSetterExps = [];
 
 		var delimiters = ",.(){}[] \t\n;?:|&<>/*+-'\"=".split("");
 
@@ -83,6 +94,8 @@ class ShaderFrontend implements FrontendPlugin {
             glslStream.dropWhitespace();
             glslStream.dropString(delim);
         }
+
+		var expect = glslStream.expect;
 
 		while (!glslStream.isEmpty()) {
 			switch (glslStream.takeWhileOneOf(delimiters)) {
@@ -131,6 +144,67 @@ class ShaderFrontend implements FrontendPlugin {
                 case Some(name) if (name == coordIn):
                     transformedCode += "openfl_TextureCoordv * openfl_TextureSize";
 
+				case Some("uniform"):
+					var uType = expect("uniform type", nextToken);
+
+					// Don't try to handle arrays:
+					if (glslStream.startsWith("[")) {
+						transformedCode += 'uniform $uType ${expect("array uniform declaration", glslStream.takeUntilAndDrop.bind(";"))};';
+						continue;
+					}
+
+					// This feature is also very incompatible with the extended metadata system of openfl shaders uniforms:
+					// https://api.openfl.org/openfl/display/ShaderParameter.html
+
+					var name = expect("uniform name", nextToken);
+					dropNext("=");
+					var expression = expect("uniform default value", glslStream.takeUntilAndDrop.bind(";"));
+
+					var suffix = "";
+					var propGenerated = true;
+					switch (uType) {
+						case "float":
+							suffix = "Float";
+							type.fields.push({
+								pos: pos,
+								name: '${name}Float',
+								kind: FProp("get", "set", Helpers.parseComplexType("Float")),
+								access: [APublic]
+							});
+							type.fields.push({
+								pos: pos,
+								name: 'set_${name}Float',
+								kind: FFun({
+									args: [{type: Helpers.parseComplexType("Float"), name: "value"}],
+									expr: macro {this.data.$name.value = [value]; return value;}
+								})
+							});
+							type.fields.push({
+								pos: pos,
+								name: 'get_${name}Float',
+								kind: FFun({
+									args: [],
+									expr: macro return this.data.$name.value[0]
+								})
+							});
+						// case "vec3":
+						// case "vec4":
+						default:
+							propGenerated = false;
+					}
+
+					if (propGenerated) {
+						var expressionInterpreted = hInterp.execute(hParser.parseString(expression));
+
+						var primitives = ["float"];
+						if (primitives.contains(uType)) {
+							expressionInterpreted = macro $v{expressionInterpreted};
+						}
+
+						defaultSetterExps.push(macro $i{name + suffix} = $expressionInterpreted);
+					}
+
+					transformedCode += 'uniform $uType $name = ${expression};';
 				case Some(other):
 					transformedCode += other;
 				default:
@@ -171,10 +245,13 @@ class ShaderFrontend implements FrontendPlugin {
 					this.camera = camera;
 					data.cameraPos.value = [camera.viewLeft, camera.viewTop];
 					data.cameraZoom.value = [1.0];
+					$b{defaultSetterExps}
 				}
 			}),
 			access: [APublic]
 		});
+
+		trace([for (field in type.fields) field.name]);
 	}
 
 	static function use() {
