@@ -320,7 +320,7 @@ class ShaderFrontend implements FrontendPlugin {
 			access: [APublic]
 		});
 
-		trace([for (field in type.fields) field.name]);
+		// trace([for (field in type.fields) field.name]);
 	}
 
 	static function use() {
