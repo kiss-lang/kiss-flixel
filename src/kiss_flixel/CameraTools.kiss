@@ -116,14 +116,25 @@
     (let [:Array<BitmapFilter> filters (for shader shaders (new ShaderFilter shader))]
         (camera.setFilters filters)))
 
+(var :Map<FlxCamera,FlxColor> cameraBgColors (new Map))
 (function addBackgroundShaders [:Array<FlxShader> shaders]
     (let [:flixel.FlxCamera camera (new flixel.FlxCamera)
             cameras (FlxG.cameras.list.copy)
             defaults (.copy (Reflect.field FlxG.cameras "defaults"))]
-        (set camera.bgColor flixel.util.FlxColor.TRANSPARENT)
+        (set camera.bgColor FlxColor.TRANSPARENT)
         (addShaderFilter camera shaders)
         (doFor _camera cameras
+            (dictSet cameraBgColors _camera _camera.bgColor)
+            (set _camera.bgColor flixel.util.FlxColor.TRANSPARENT)
             (FlxG.cameras.remove _camera false))
         (FlxG.cameras.add camera false)
         (doFor _camera cameras
             (FlxG.cameras.add _camera (defaults.contains _camera)))))
+
+(function removeBackgroundShaders []
+    (let [cameras (FlxG.cameras.list.copy)]
+        // Destroy the background filter camera
+        (FlxG.cameras.remove (cameras.shift) true)
+        (doFor _camera cameras
+            (set _camera.bgColor (dictGet cameraBgColors _camera))
+            (cameraBgColors.remove _camera))))
