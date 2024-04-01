@@ -102,6 +102,7 @@ class ShaderFrontend implements FrontendPlugin {
 		var colorOut = "";
 		var coordIn = "";
 
+		transformedCode += "const float PI = 3.1415926535897932384626433832795;\n";
 
         function nextToken() {
             glslStream.dropWhitespace();
@@ -132,35 +133,58 @@ class ShaderFrontend implements FrontendPlugin {
                         default:
                     }
 
+				// Shadertoy compatibility:
 				case Some("iResolution"):
 					transformedCode += "openfl_TextureSize";
 
-                case Some("mainImage"):
-                    dropNext("(");
-                    dropNext("out");
-                    dropNext("vec4");
-                    switch (nextToken()) {
-                        case Some(symbol):
-                            colorOut = symbol;
-                        default:
-                            error();
-                    }
-                    dropNext(",");
-                    dropNext("in");
-                    dropNext("vec2");
-                    switch (nextToken()) {
-                        case Some(symbol):
-                            coordIn = symbol;
-                        default:
-                            error();
-                    }
-                    dropNext(")");
-                    transformedCode += "main() ";
+				case Some("void"):
+					switch (nextToken()) {
+						case Some("mainImage"):
+							dropNext("(");
+							dropNext("out");
+							dropNext("vec4");
+							switch (nextToken()) {
+								case Some(symbol):
+									colorOut = symbol;
+								default:
+									error();
+							}
+							dropNext(",");
+							dropNext("in");
+							dropNext("vec2");
+							switch (nextToken()) {
+								case Some(symbol):
+									coordIn = symbol;
+								default:
+									error();
+							}
+							dropNext(")");
+							transformedCode += "void main() ";
+						case Some("fragment"):
+							dropNext("()");
+							transformedCode += "void main() ";
+						case Some(other):
+							transformedCode += 'void $other';
+						default:
+							throw "expected name of void function";
+					}
 
                 case Some(name) if (name == colorOut):
                     transformedCode += "gl_FragColor";
                 case Some(name) if (name == coordIn):
                     transformedCode += "openfl_TextureCoordv * openfl_TextureSize";
+
+				// Godot compatibility
+				case Some("TIME"):
+					transformedCode += "iTime";
+				case Some("COLOR"):
+					transformedCode += "gl_FragColor";
+				
+				// Not totally sure this actually is a 1-to-1 equivalency:
+				case Some("SCREEN_UV"):
+					transformedCode += "openfl_TextureCoordv";
+				case Some("SCREEN_PIXEL_SIZE"):
+					transformedCode += "vec2(1 / openfl_TextureSize.x, 1 / openfl_TextureSize.y)";
 
 				case Some("uniform"):
 					var uType = expect("uniform type", nextToken);
