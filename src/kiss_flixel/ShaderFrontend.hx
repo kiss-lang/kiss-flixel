@@ -19,7 +19,25 @@ class ShaderFrontend implements FrontendPlugin {
 	static var hInterp = new Interp();
 
 	public function new() {
-		// hInterp.variables["vec3"] = ...;
+		function vec3(x, ?y, ?z) {
+			if (y == null && z == null) {
+				y = x;
+				z = x;
+			}
+			return macro flixel.util.FlxColor.fromRGBFloat($v{x}, $v{y}, $v{z});
+		}
+		hInterp.variables["vec3"] = vec3;
+
+		function vec4(x, ?y, ?z, ?w) {
+			if (y == null && z == null && w == null) {
+				y = x;
+				z = x;
+				w = x;
+			}
+			return macro flixel.util.FlxColor.fromRGBFloat($v{x}, $v{y}, $v{z}, $v{w});
+		}
+		hInterp.variables["vec4"] = vec4;
+
 	}
 
 	var vertexExtensions = ["v.glsl", "vert"];
@@ -188,6 +206,47 @@ class ShaderFrontend implements FrontendPlugin {
 							})
 						});
 					}
+
+					function flxColorProperty(withAlpha:Bool) {
+						suffix = "FlxColor";
+						var _type = "flixel.util.FlxColor";
+						type.fields.push({
+							pos: pos,
+							name: '${name}${suffix}',
+							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
+							access: [APublic]
+						});
+						type.fields.push({
+							pos: pos,
+							name: 'set_${name}${suffix}',
+							kind: FFun({
+								args: [{type: Helpers.parseComplexType(_type), name: "value"}],
+								expr: macro {
+									if ($v{withAlpha}) {
+										this.data.$name.value = [value.redFloat, value.greenFloat, value.blueFloat, value.alphaFloat];
+										return value;
+									} else if (value.alphaFloat != 1.0) {
+										throw "vec3 uniform cannot be assigned to a color with transparency";
+									} else {
+										this.data.$name.value = [value.redFloat, value.greenFloat, value.blueFloat];
+										return value;
+									}
+								}
+							})
+						});
+						type.fields.push({
+							pos: pos,
+							name: 'get_${name}${suffix}',
+							kind: FFun({
+								args: [],
+								expr: macro {
+									var components = this.data.$name.value;
+									var alpha = if ($v{withAlpha}) components[3] else 1.0;
+									return flixel.util.FlxColor.fromRGBFloat(components[0], components[1], components[2], alpha);
+								}
+							})
+						});
+					}				
 					switch (uType) {
 						case "float":
 							simpleProperty("Float");
@@ -195,8 +254,10 @@ class ShaderFrontend implements FrontendPlugin {
 							simpleProperty("Bool");
 						case "int":
 							simpleProperty("Int");
-						// case "vec3":
-						// case "vec4":
+						case "vec3":
+							flxColorProperty(false);
+						case "vec4":
+							flxColorProperty(true);
 						default:
 							propGenerated = false;
 					}

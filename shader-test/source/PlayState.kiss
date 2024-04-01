@@ -19,8 +19,8 @@
         (add bg))
     (set shader (new kiss_flixel.shaders.CheckerBoard))
     // (set shader.data.invert.value [true])
-    (set shader.data.color1.value [1.0 1.0 1.0 1.0])
-    (set shader.data.color2.value [0.0 0.0 0.0 1.0])
+    // (set shader.data.color1.value [1.0 1.0 1.0 1.0])
+    // (set shader.data.color2.value [0.0 0.0 0.0 1.0])
     // (set shader.checkSizeFloat 64.0)
     (let [:BitmapFilter filter (new ShaderFilter shader)
             :Array<BitmapFilter> filters [filter]]
