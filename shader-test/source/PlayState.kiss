@@ -4,6 +4,7 @@
 (import flixel.util.FlxColor)
 (import openfl.filters.BitmapFilter)
 (import openfl.filters.ShaderFilter)
+(import flixel.system.FlxAssets.FlxShader)
 
 (extends FlxState)
 
@@ -17,12 +18,12 @@
         (bg.screenCenter)
         (set bg.alpha 0.5)
         (add bg))
-    (set shader (new kiss_flixel.shaders.MirroredOrnament))
+    (kiss_flixel.CameraTools.addBackgroundShaders (array FlxShader (new kiss_flixel.shaders.MirroredOrnament)))
     // (set shader.data.invert.value [true])
     // (set shader.data.color1.value [1.0 1.0 1.0 1.0])
     // (set shader.data.color2.value [0.0 0.0 0.0 1.0])
     // (set shader.checkSizeFloat 64.0)
-    (let [:BitmapFilter filter (new ShaderFilter shader)
+    **(let [:BitmapFilter filter (new ShaderFilter shader)
             :Array<BitmapFilter> filters [filter]]
         (FlxG.camera.setFilters filters)))
 

@@ -14,6 +14,9 @@ import flixel.util.FlxColor;
 import flixel.FlxObject;
 import flixel.group.FlxGroup;
 import kiss_flixel.GroupTools;
+import flixel.system.FlxAssets.FlxShader;
+import openfl.filters.BitmapFilter;
+import openfl.filters.ShaderFilter;
 
 using Lambda;
 

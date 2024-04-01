@@ -111,3 +111,19 @@
         (setMin camera.minScrollY (- r.top margin))
         (setMax camera.maxScrollX (+ r.right margin))
         (setMax camera.maxScrollY (+ r.bottom margin))))
+
+(function addShaderFilter [:FlxCamera camera :Array<FlxShader> shaders]
+    (let [:Array<BitmapFilter> filters (for shader shaders (new ShaderFilter shader))]
+        (camera.setFilters filters)))
+
+(function addBackgroundShaders [:Array<FlxShader> shaders]
+    (let [:flixel.FlxCamera camera (new flixel.FlxCamera)
+            cameras (FlxG.cameras.list.copy)
+            defaults (.copy (Reflect.field FlxG.cameras "defaults"))]
+        (set camera.bgColor flixel.util.FlxColor.TRANSPARENT)
+        (addShaderFilter camera shaders)
+        (doFor _camera cameras
+            (FlxG.cameras.remove _camera false))
+        (FlxG.cameras.add camera false)
+        (doFor _camera cameras
+            (FlxG.cameras.add _camera (defaults.contains _camera)))))
