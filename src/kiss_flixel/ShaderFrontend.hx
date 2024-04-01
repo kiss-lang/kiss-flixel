@@ -162,31 +162,39 @@ class ShaderFrontend implements FrontendPlugin {
 
 					var suffix = "";
 					var propGenerated = true;
+
+					function simpleProperty(_type:String) {
+						suffix = _type;
+						type.fields.push({
+							pos: pos,
+							name: '${name}${_type}',
+							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
+							access: [APublic]
+						});
+						type.fields.push({
+							pos: pos,
+							name: 'set_${name}${_type}',
+							kind: FFun({
+								args: [{type: Helpers.parseComplexType(_type), name: "value"}],
+								expr: macro {this.data.$name.value = [value]; return value;}
+							})
+						});
+						type.fields.push({
+							pos: pos,
+							name: 'get_${name}${_type}',
+							kind: FFun({
+								args: [],
+								expr: macro return this.data.$name.value[0]
+							})
+						});
+					}
 					switch (uType) {
 						case "float":
-							suffix = "Float";
-							type.fields.push({
-								pos: pos,
-								name: '${name}Float',
-								kind: FProp("get", "set", Helpers.parseComplexType("Float")),
-								access: [APublic]
-							});
-							type.fields.push({
-								pos: pos,
-								name: 'set_${name}Float',
-								kind: FFun({
-									args: [{type: Helpers.parseComplexType("Float"), name: "value"}],
-									expr: macro {this.data.$name.value = [value]; return value;}
-								})
-							});
-							type.fields.push({
-								pos: pos,
-								name: 'get_${name}Float',
-								kind: FFun({
-									args: [],
-									expr: macro return this.data.$name.value[0]
-								})
-							});
+							simpleProperty("Float");
+						case "bool":
+							simpleProperty("Bool");
+						case "int":
+							simpleProperty("Int");
 						// case "vec3":
 						// case "vec4":
 						default:
@@ -196,7 +204,7 @@ class ShaderFrontend implements FrontendPlugin {
 					if (propGenerated) {
 						var expressionInterpreted = hInterp.execute(hParser.parseString(expression));
 
-						var primitives = ["float"];
+						var primitives = ["float", "int", "bool"];
 						if (primitives.contains(uType)) {
 							expressionInterpreted = macro $v{expressionInterpreted};
 						}
