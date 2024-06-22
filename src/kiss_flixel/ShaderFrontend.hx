@@ -68,9 +68,9 @@ class ShaderFrontend implements FrontendPlugin {
 		// * ShaderToy-esque iTime
 		// * Camera position (cameraPos)
 		// * Camera zoom (cameraZoom)
-		transformedCode += 'uniform float iTime = 0.0;\n';
-		transformedCode += 'uniform vec2 cameraPos = vec2(0.0, 0.0);\n';
-		transformedCode += 'uniform float cameraZoom = 1.0;\n';
+		transformedCode += 'uniform float iTime;\n';
+		transformedCode += 'uniform vec2 cameraPos;\n';
+		transformedCode += 'uniform float cameraZoom;\n';
 		type.fields.push({
 			pos: pos,
 			name: "__update",
@@ -179,7 +179,7 @@ class ShaderFrontend implements FrontendPlugin {
 					transformedCode += "iTime";
 				case Some("COLOR"):
 					transformedCode += "gl_FragColor";
-				
+
 				// Not totally sure this actually is a 1-to-1 equivalency:
 				case Some("SCREEN_UV"):
 					transformedCode += "openfl_TextureCoordv";
@@ -270,7 +270,7 @@ class ShaderFrontend implements FrontendPlugin {
 								}
 							})
 						});
-					}				
+					}
 					switch (uType) {
 						case "float":
 							simpleProperty("Float");
