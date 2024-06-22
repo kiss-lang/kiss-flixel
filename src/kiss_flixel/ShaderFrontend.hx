@@ -184,7 +184,7 @@ class ShaderFrontend implements FrontendPlugin {
 				case Some("SCREEN_UV"):
 					transformedCode += "openfl_TextureCoordv";
 				case Some("SCREEN_PIXEL_SIZE"):
-					transformedCode += "vec2(1 / openfl_TextureSize.x, 1 / openfl_TextureSize.y)";
+					transformedCode += "vec2(1.0 / openfl_TextureSize.x, 1.0 / openfl_TextureSize.y)";
 
 				case Some("uniform"):
 					var uType = expect("uniform type", nextToken);
@@ -297,7 +297,7 @@ class ShaderFrontend implements FrontendPlugin {
 						defaultSetterExps.push(macro $i{name + suffix} = $expressionInterpreted);
 					}
 
-					transformedCode += 'uniform $uType $name = ${expression};';
+					transformedCode += 'uniform $uType $name;';
 				case Some(other):
 					transformedCode += other;
 				default:
