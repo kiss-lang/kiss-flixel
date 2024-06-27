@@ -1,7 +1,8 @@
 #pragma header
 
 // Source: https://godotshaders.com/shader/animated-mirrored-ornament/
-// Modified by Nat
+// by FencerDevLog (CC0)
+// Ported to kiss-flixel by NQNStudios
 
 uniform vec3 color_a = vec3(0.5);
 uniform vec3 color_b = vec3(0.5);

@@ -187,11 +187,17 @@ class ShaderFrontend implements FrontendPlugin {
 					transformedCode += "iTime";
 				case Some("COLOR"):
 					transformedCode += "gl_FragColor";
+				case Some("TEXTURE"):
+					transformedCode += "bitmap";
+				
+				case Some("texture"):
+					transformedCode += "flixel_texture2D";
 
 				// Not totally sure this actually is a 1-to-1 equivalency:
-				case Some("SCREEN_UV"):
+				case Some("SCREEN_UV" | "UV"):
 					transformedCode += "openfl_TextureCoordv";
-				case Some("SCREEN_PIXEL_SIZE"):
+
+				case Some("SCREEN_PIXEL_SIZE" | "TEXTURE_PIXEL_SIZE"):
 					transformedCode += "vec2(1.0 / openfl_TextureSize.x, 1.0 / openfl_TextureSize.y)";
 
 				// Uniform handling:

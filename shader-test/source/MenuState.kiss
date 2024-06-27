@@ -18,6 +18,7 @@
             (array Class<FlxState>
                 CheckerBoardState
                 InvertState
-                MirroredOrnamentState)
+                MirroredOrnamentState
+                ShadowState)
             
             ->choice (FlxG.switchState (Type.createInstance choice [])))))
