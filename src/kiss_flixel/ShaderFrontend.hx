@@ -19,6 +19,14 @@ class ShaderFrontend implements FrontendPlugin {
 	static var hInterp = new Interp();
 
 	public function new() {
+		function vec2(x, ?y) {
+			if (y == null) {
+				y = x;
+			}
+			return macro flixel.math.FlxPoint.get($v{x}, $v{y});
+		}
+		hInterp.variables["vec2"] = vec2;
+
 		function vec3(x, ?y, ?z) {
 			if (y == null && z == null) {
 				y = x;
@@ -186,6 +194,7 @@ class ShaderFrontend implements FrontendPlugin {
 				case Some("SCREEN_PIXEL_SIZE"):
 					transformedCode += "vec2(1.0 / openfl_TextureSize.x, 1.0 / openfl_TextureSize.y)";
 
+				// Uniform handling:
 				case Some("uniform"):
 					var uType = expect("uniform type", nextToken);
 
@@ -231,6 +240,38 @@ class ShaderFrontend implements FrontendPlugin {
 						});
 					}
 
+					function flxPointProperty() {
+						suffix = "FlxPoint";
+						var _type = "flixel.math.FlxPoint";
+						type.fields.push({
+							pos: pos,
+							name: '${name}${suffix}',
+							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
+							access: [APublic]
+						});
+						type.fields.push({
+							pos: pos,
+							name: 'set_${name}${suffix}',
+							kind: FFun({
+								args: [{type: Helpers.parseComplexType(_type), name: "value"}],
+								expr: macro {
+									this.data.$name.value = [value.x, value.y];
+									return value;
+								}
+							})
+						});
+						type.fields.push({
+							pos: pos,
+							name: 'get_${name}${suffix}',
+							kind: FFun({
+								args: [],
+								expr: macro {
+									var components = this.data.$name.value;
+									return flixel.math.FlxPoint.get(components[0], components[1]);
+								}
+							})
+						});
+					}
 					function flxColorProperty(withAlpha:Bool) {
 						suffix = "FlxColor";
 						var _type = "flixel.util.FlxColor";
@@ -278,6 +319,8 @@ class ShaderFrontend implements FrontendPlugin {
 							simpleProperty("Bool");
 						case "int":
 							simpleProperty("Int");
+						case "vec2":
+						  	flxPointProperty();
 						case "vec3":
 							flxColorProperty(false);
 						case "vec4":
