@@ -1,0 +1,23 @@
+(import flixel.FlxState)
+(import flixel.FlxG)
+(import flixel.FlxSprite)
+(import flixel.util.FlxColor)
+(import openfl.filters.BitmapFilter)
+(import openfl.filters.ShaderFilter)
+(import flixel.system.FlxAssets.FlxShader)
+
+(extends FlxState)
+
+(method &override :Void create []
+    (super.create))
+
+(method &override :Void update [:Float elapsed]
+    (super.update elapsed)
+    (oncePerInstance
+        (kiss_flixel.SimpleWindow.promptForChoice "Test which shader?"
+            (array Class<FlxState>
+                CheckerBoardState
+                InvertState
+                MirroredOrnamentState)
+            
+            ->choice (FlxG.switchState (Type.createInstance choice [])))))

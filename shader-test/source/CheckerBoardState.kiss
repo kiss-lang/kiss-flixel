@@ -1,0 +1,25 @@
+(import flixel.FlxState)
+(import flixel.FlxG)
+(import flixel.FlxSprite)
+(import flixel.util.FlxColor)
+(import openfl.filters.BitmapFilter)
+(import openfl.filters.ShaderFilter)
+(import flixel.system.FlxAssets.FlxShader)
+
+(extends FlxState)
+
+(prop &mut shader null)
+
+(method &override :Void create []
+    (super.create)
+    (set shader (new kiss_flixel.shaders.CheckerBoard))
+    (set shader.data.color1FlxColor FlxColor.WHITE)
+    (set shader.data.color2FlxColor FlxColor.BLACK)
+    (set shader.checkSizeFloat 64.0)
+    (set FlxG.camera.bgColor FlxColor.TRANSPARENT)
+    (kiss_flixel.CameraTools.addShaderFilter FlxG.camera (array FlxShader shader)))
+
+(method &override :Void update [:Float elapsed]
+    (super.update elapsed)
+    (+= FlxG.camera.scroll.x 0.05)
+    (+= FlxG.camera.scroll.y 0.05))
