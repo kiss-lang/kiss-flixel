@@ -295,6 +295,8 @@ class ShaderFrontend implements FrontendPlugin {
 						}
 
 						defaultSetterExps.push(macro $i{name + suffix} = $expressionInterpreted);
+					} else {
+						trace('Warning! uniform $uType $name in $file may have its default value of ${expression} ignored!');
 					}
 
 					transformedCode += 'uniform $uType $name;';
