@@ -2,6 +2,7 @@
 (import flixel.FlxG)
 (import flixel.FlxSprite)
 (import flixel.util.FlxColor)
+(import flixel.math.FlxPoint)
 (import flixel.FlxCamera)
 (import openfl.filters.BitmapFilter)
 (import openfl.filters.ShaderFilter)
@@ -12,10 +13,11 @@
 (prop &mut shader null)
 (prop &mut fgCamera null)
 
-(prop &mut x 200)
+(prop &mut x 30)
 (prop &mut y 200)
 
 (prop &mut sprite null)
+(prop &mut :FlxPoint deform (new FlxPoint 2.0 2.0))
 
 (method &override :Void create []
     (super.create)
@@ -26,7 +28,7 @@
     (set fgCamera.bgColor FlxColor.TRANSPARENT)
     (FlxG.cameras.add fgCamera)
 
-    (set sprite (new FlxSprite  x y "assets/images/flymanEdited.png"))
+    (set sprite (new FlxSprite x y "assets/images/flymanEdited.png"))
     (set sprite.cameras [fgCamera])
     (add sprite)
 
@@ -34,4 +36,18 @@
     (kiss_flixel.CameraTools.addShaderFilter fgCamera (array FlxShader shader)))
 
 (method &override :Void update [:Float elapsed]
-    (super.update elapsed))
+    (super.update elapsed)
+    
+    (var SPEED 1.0)
+    (when FlxG.keys.pressed.UP
+        (+= deform.y (* SPEED elapsed)))
+    (when FlxG.keys.pressed.DOWN
+        (-= deform.y (* SPEED elapsed)))   
+    (when FlxG.keys.pressed.RIGHT
+        (+= deform.x (* SPEED elapsed)))   
+    (when FlxG.keys.pressed.LEFT
+        (-= deform.x (* SPEED elapsed)))
+        
+    ~deform
+    
+    (set shader.deformFlxPoint deform))
