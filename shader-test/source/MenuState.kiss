@@ -19,6 +19,7 @@
                 CheckerBoardState
                 InvertState
                 MirroredOrnamentState
-                ShadowState)
+                ShadowState
+                TVStaticState)
             
             ->choice (FlxG.switchState (Type.createInstance choice [])))))
