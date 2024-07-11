@@ -203,7 +203,7 @@ class ShaderFrontend implements FrontendPlugin {
 					transformedCode += "iTime";
 				case Some("COLOR"):
 					transformedCode += "gl_FragColor";
-				case Some("TEXTURE"):
+				case Some("SCREEN_TEXTURE" | "TEXTURE"):
 					transformedCode += "bitmap";
 				
 				case Some("texture"):

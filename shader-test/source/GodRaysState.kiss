@@ -1,0 +1,31 @@
+(import flixel.FlxState)
+(import flixel.FlxG)
+(import flixel.FlxSprite)
+(import flixel.util.FlxColor)
+(import openfl.filters.BitmapFilter)
+(import openfl.filters.ShaderFilter)
+(import flixel.system.FlxAssets.FlxShader)
+(import flixel.FlxCamera)
+
+(extends FlxState)
+
+(prop &mut shader null)
+(prop &mut sprite null)
+(prop &mut fgCamera null)
+
+(method &override :Void create []
+    (super.create)
+    (set shader (new kiss_flixel.shaders.GodRays))
+    (set sprite (new FlxSprite 0 0 "assets/images/flymanEdited.png"))
+    (add sprite)
+
+    (set FlxG.camera.bgColor FlxColor.GRAY)
+    
+    (set fgCamera (new FlxCamera))
+    (set fgCamera.bgColor FlxColor.TRANSPARENT)
+    (FlxG.cameras.add fgCamera false)
+
+    (kiss_flixel.CameraTools.addShaderFilter fgCamera (array FlxShader shader)))
+
+(method &override :Void update [:Float elapsed]
+    (super.update elapsed))
