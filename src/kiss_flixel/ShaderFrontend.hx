@@ -45,7 +45,22 @@ class ShaderFrontend implements FrontendPlugin {
 			return macro flixel.util.FlxColor.fromRGBFloat($v{x}, $v{y}, $v{z}, $v{w});
 		}
 		hInterp.variables["vec4"] = vec4;
+	}
+	 
+	static function hint_range_int(min, max, ?step) {
+		return if (step == null) {
+			macro kiss_flixel.shaders.Uniform.IntRange($v{min}, $v{max});
+		} else {
+			macro kiss_flixel.shaders.Uniform.IntRangeStep($v{min}, $v{max}, $v{step});
+		};
+	}
 
+	static function hint_range_float(min, max, ?step) {
+		return if (step == null) {
+			macro kiss_flixel.shaders.Uniform.FloatRange($v{min}, $v{max});
+		} else {
+			macro kiss_flixel.Uniform.FloatRangeStep($v{min}, $v{max}, $v{step});
+		};
 	}
 
 	var vertexExtensions = ["v.glsl", "vert"];
@@ -67,10 +82,10 @@ class ShaderFrontend implements FrontendPlugin {
 
 		var glslStream = Stream.fromFile(file);
 
-        var transformedCode = "";
-        function error(reason = "") {
-            throw 'Error transforming shader code! $reason';
-        }
+		var transformedCode = "";
+		function error(reason = "") {
+			throw 'Error transforming shader code! $reason';
+		}
 
 		// Supply some useful properties, updated every frame:
 		// * ShaderToy-esque iTime
@@ -104,6 +119,7 @@ class ShaderFrontend implements FrontendPlugin {
 
 		// give uniforms their default values
 		var defaultSetterExps = [];
+		var uniformMapExps = [];
 
 		var delimiters = ",.(){}[] \t\n;?:|&<>/*+-'\"=".split("");
 
@@ -214,6 +230,30 @@ class ShaderFrontend implements FrontendPlugin {
 					// https://api.openfl.org/openfl/display/ShaderParameter.html
 
 					var name = expect("uniform name", nextToken);
+
+					var range = null;
+					var isColor = false;
+					glslStream.dropWhitespace();
+					// handle a Godot-syntax hint_ annotation
+					if (glslStream.startsWith(":")) {
+						dropNext(":");
+						glslStream.dropWhitespace();
+						if (glslStream.startsWith("hint_range")) {
+							switch (uType) {
+								case "float":
+									hInterp.variables["hint_range"] = hint_range_float;
+								case "int":
+									hInterp.variables["hint_range"] = hint_range_int;
+								default:
+									throw 'hint_range is only valid on int/float uniforms';
+							}
+							range = hInterp.execute(hParser.parseString(expect("hint_range() expression", glslStream.takeUntilAndDrop.bind(")")) + ")"));
+						} else if (glslStream.startsWith("hint_color")) {
+							dropNext("hint_color");
+							isColor = true;
+						}
+					}
+
 					dropNext("=");
 					var expression = expect("uniform default value", glslStream.takeUntilAndDrop.bind(";"));
 
@@ -221,10 +261,23 @@ class ShaderFrontend implements FrontendPlugin {
 					var propGenerated = true;
 
 					function simpleProperty(_type:String) {
+						var propName = '${name}${_type}';
+						switch (_type) {
+							case "Bool":
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.Boolean});
+							case "Int" | "Float" if (range != null):
+								uniformMapExps.push(macro $v{propName} => $range);
+							case "Int":
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.AnyInt});
+							case "Float":
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.AnyFloat});
+							default:
+								throw 'not a simpleProperty type: $_type';
+						}
 						suffix = _type;
 						type.fields.push({
 							pos: pos,
-							name: '${name}${_type}',
+							name: propName,
 							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
 							access: [APublic]
 						});
@@ -248,10 +301,13 @@ class ShaderFrontend implements FrontendPlugin {
 
 					function flxPointProperty() {
 						suffix = "FlxPoint";
+						var propName = '${name}${suffix}';
+						uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.Vector2});
+
 						var _type = "flixel.math.FlxPoint";
 						type.fields.push({
 							pos: pos,
-							name: '${name}${suffix}',
+							name: propName,
 							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
 							access: [APublic]
 						});
@@ -280,10 +336,21 @@ class ShaderFrontend implements FrontendPlugin {
 					}
 					function flxColorProperty(withAlpha:Bool) {
 						suffix = "FlxColor";
+						var propName = '${name}${suffix}';
+						if (isColor) {
+							if (withAlpha) {
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.ColorWithAlpha});
+							} else {
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.ColorSolid});
+							}
+						} else {
+							uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.Vector3});
+						}
+
 						var _type = "flixel.util.FlxColor";
 						type.fields.push({
 							pos: pos,
-							name: '${name}${suffix}',
+							name: propName,
 							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
 							access: [APublic]
 						});
@@ -354,6 +421,14 @@ class ShaderFrontend implements FrontendPlugin {
 				default:
 			}
 		}
+
+
+		type.fields.push({
+			pos: pos,
+			name: "uniforms",
+			access: [APublic],
+			kind: FProp("default", "null", Helpers.parseComplexType("Map<String,kiss_flixel.shaders.Uniform>"), macro $a{uniformMapExps})
+		});
 
 		transformedCode = "#pragma header\n" + transformedCode;
 

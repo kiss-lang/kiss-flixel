@@ -18,7 +18,9 @@
         (bg.screenCenter)
         (set bg.alpha 0.5)
         (add bg))
-    (kiss_flixel.CameraTools.addBackgroundShaders (array FlxShader (new kiss_flixel.shaders.MirroredOrnament))))
+    (set shader (new kiss_flixel.shaders.MirroredOrnament))
+    ~shader.uniforms
+    (kiss_flixel.CameraTools.addBackgroundShaders (array FlxShader shader)))
 
 (method &override :Void update [:Float elapsed]
     (super.update elapsed)

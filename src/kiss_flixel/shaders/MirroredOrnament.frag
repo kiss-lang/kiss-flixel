@@ -8,11 +8,11 @@ uniform vec3 color_a = vec3(0.5);
 uniform vec3 color_b = vec3(0.5);
 uniform vec3 color_c = vec3(1.0);
 uniform vec3 color_d = vec3(0.0, 0.33, 0.67);
-uniform int iterations = 10; // : hint_range(1, 50, 1)
-uniform float speed = 1.0; // : hint_range(0.1, 10.0)
-uniform float zoom = 1.0; // : hint_range(0.1, 5.0)
-uniform float subtract = 0.5; // : hint_range(0.1, 1.0)
-uniform float multiply = 1.1; // : hint_range(1.0, 2.0)
+uniform int iterations: hint_range(1, 50, 1) = 10;
+uniform float speed: hint_range(0.1, 10.0) = 1.0; 
+uniform float zoom: hint_range(0.1, 5.0) = 1.0;
+uniform float subtract: hint_range(0.1, 1.0) = 0.5;
+uniform float multiply: hint_range(1.0, 2.0) = 1.1;
 
 vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
 	return a + b * cos(2.0 * PI * (c * t + d));
