@@ -278,15 +278,23 @@ class ShaderFrontend implements FrontendPlugin {
 						type.fields.push({
 							pos: pos,
 							name: propName,
-							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
+							kind: FProp("get", "set", Helpers.parseComplexType('Null<$_type>')),
 							access: [APublic]
 						});
+						var jsonType = {
+							pack: ["kiss_tools"],
+							name: "Json" + _type
+						};
 						type.fields.push({
 							pos: pos,
 							name: 'set_${name}${_type}',
 							kind: FFun({
-								args: [{type: Helpers.parseComplexType(_type), name: "value"}],
-								expr: macro {this.data.$name.value = [value]; return value;}
+								args: [{type: Helpers.parseComplexType('Null<$_type>'), name: "value"}],
+								expr: macro {
+									this.data.$name.value = [value];
+									this.json?.put($v{propName}, new kiss_tools.JsonString(new $jsonType(value).stringify()));
+									return value;
+								}
 							})
 						});
 						type.fields.push({
@@ -294,7 +302,13 @@ class ShaderFrontend implements FrontendPlugin {
 							name: 'get_${name}${_type}',
 							kind: FFun({
 								args: [],
-								expr: macro return this.data.$name.value[0]
+								expr: macro {
+									var v = this.data.$name.value;
+									return if (v == null || v.length == 0)
+										null;
+									else
+										v[0];
+								} 
 							})
 						});
 					}
@@ -308,14 +322,14 @@ class ShaderFrontend implements FrontendPlugin {
 						type.fields.push({
 							pos: pos,
 							name: propName,
-							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
+							kind: FProp("get", "set", Helpers.parseComplexType('Null<$_type>')),
 							access: [APublic]
 						});
 						type.fields.push({
 							pos: pos,
 							name: 'set_${name}${suffix}',
 							kind: FFun({
-								args: [{type: Helpers.parseComplexType(_type), name: "value"}],
+								args: [{type: Helpers.parseComplexType('Null<$_type>'), name: "value"}],
 								expr: macro {
 									this.data.$name.value = [value.x, value.y];
 									return value;
@@ -351,20 +365,22 @@ class ShaderFrontend implements FrontendPlugin {
 						type.fields.push({
 							pos: pos,
 							name: propName,
-							kind: FProp("get", "set", Helpers.parseComplexType(_type)),
+							kind: FProp("get", "set", Helpers.parseComplexType('Null<$_type>')),
 							access: [APublic]
 						});
 						type.fields.push({
 							pos: pos,
 							name: 'set_${name}${suffix}',
 							kind: FFun({
-								args: [{type: Helpers.parseComplexType(_type), name: "value"}],
+								args: [{type: Helpers.parseComplexType('Null<$_type>'), name: "value"}],
 								expr: macro {
+									if (!$v{withAlpha} && value.alphaFloat != 1.0) {
+										throw "vec3 uniform cannot be assigned to a color with transparency";
+									} 
+									this.json?.put($v{propName}, new kiss_tools.JsonString(new JsonFlxColor(value).stringify()));
 									if ($v{withAlpha}) {
 										this.data.$name.value = [value.redFloat, value.greenFloat, value.blueFloat, value.alphaFloat];
 										return value;
-									} else if (value.alphaFloat != 1.0) {
-										throw "vec3 uniform cannot be assigned to a color with transparency";
 									} else {
 										this.data.$name.value = [value.redFloat, value.greenFloat, value.blueFloat];
 										return value;
@@ -379,6 +395,8 @@ class ShaderFrontend implements FrontendPlugin {
 								args: [],
 								expr: macro {
 									var components = this.data.$name.value;
+									if (components == null || components.length == 0)
+										return null;
 									var alpha = if ($v{withAlpha}) components[3] else 1.0;
 									return flixel.util.FlxColor.fromRGBFloat(components[0], components[1], components[2], alpha);
 								}
@@ -410,7 +428,8 @@ class ShaderFrontend implements FrontendPlugin {
 							expressionInterpreted = macro $v{expressionInterpreted};
 						}
 
-						defaultSetterExps.push(macro $i{name + suffix} = $expressionInterpreted);
+						var propName = macro $i{name + suffix};
+						defaultSetterExps.push(macro if ($propName == null) $propName = $expressionInterpreted);
 					} else {
 						trace('Warning! uniform $uType $name in $file may have its default value of ${expression} ignored!');
 					}
@@ -446,11 +465,14 @@ class ShaderFrontend implements FrontendPlugin {
 				args: [{
 					name: "camera",
 					opt: true
+				}, {
+					name: "jsonMapFile",
+					opt: true
 				}],
 				expr: macro {
-					uniforms = $a{uniformMapExps};
-
-					super();
+					this.uniforms = [$a{uniformMapExps}];
+					super(jsonMapFile);
+					$b{defaultSetterExps};
                     data.iTime.value = [0.0];
 					if (camera == null) {
 						camera = flixel.FlxG.camera;
@@ -458,7 +480,6 @@ class ShaderFrontend implements FrontendPlugin {
 					this.camera = camera;
 					data.cameraPos.value = [camera.viewLeft, camera.viewTop];
 					data.cameraZoom.value = [1.0];
-					$b{defaultSetterExps}
 				}
 			}),
 			access: [APublic]

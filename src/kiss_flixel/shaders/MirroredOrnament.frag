@@ -4,10 +4,10 @@
 // by FencerDevLog (CC0)
 // Ported to kiss-flixel by NQNStudios
 
-uniform vec3 color_a = vec3(0.5);
-uniform vec3 color_b = vec3(0.5);
-uniform vec3 color_c = vec3(1.0);
-uniform vec3 color_d = vec3(0.0, 0.33, 0.67);
+uniform vec3 color_a: hint_color = vec3(0.5);
+uniform vec3 color_b: hint_color = vec3(0.5);
+uniform vec3 color_c: hint_color = vec3(1.0);
+uniform vec3 color_d: hint_color = vec3(0.0, 0.33, 0.67);
 uniform int iterations: hint_range(1, 50, 1) = 10;
 uniform float speed: hint_range(0.1, 10.0) = 1.0; 
 uniform float zoom: hint_range(0.1, 5.0) = 1.0;

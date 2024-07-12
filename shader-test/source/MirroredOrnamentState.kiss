@@ -18,7 +18,7 @@
         (bg.screenCenter)
         (set bg.alpha 0.5)
         (add bg))
-    (set shader (new kiss_flixel.shaders.MirroredOrnament))
+    (set shader (new kiss_flixel.shaders.MirroredOrnament "mirroredOrnament.json"))
     ~shader.uniforms
     (kiss_flixel.CameraTools.addBackgroundShaders (array FlxShader shader)))
 
