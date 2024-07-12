@@ -1,0 +1,4 @@
+(defNew [&prop :FlxColor value])
+
+(method stringify [] "$value")
+(method parse [:String data] (new JsonFlxColor (FlxColor.fromInt (Std.parseInt data))))
