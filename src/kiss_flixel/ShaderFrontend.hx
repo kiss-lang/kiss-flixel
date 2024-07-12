@@ -75,7 +75,7 @@ class ShaderFrontend implements FrontendPlugin {
 		trace(extension);
 
 		final type = context.getType();
-		var parentClass = 'flixel.system.FlxAssets.FlxShader';
+		var parentClass = 'kiss_flixel.shaders.KFlxShader';
 		type.kind = TDClass(parentClass.asTypePath(), [], false, false, false);
 
 		var pos = Context.makePosition({file: file, min: 0, max: 0});
@@ -422,14 +422,6 @@ class ShaderFrontend implements FrontendPlugin {
 			}
 		}
 
-
-		type.fields.push({
-			pos: pos,
-			name: "uniforms",
-			access: [APublic],
-			kind: FProp("default", "null", Helpers.parseComplexType("Map<String,kiss_flixel.shaders.Uniform>"), macro $a{uniformMapExps})
-		});
-
 		transformedCode = "#pragma header\n" + transformedCode;
 
 		var metaName = if (vertexExtensions.contains(extension)) ":glVertexSource" else if (fragmentExtensions.contains(extension)) ":glFragmentSource" else
@@ -456,6 +448,8 @@ class ShaderFrontend implements FrontendPlugin {
 					opt: true
 				}],
 				expr: macro {
+					uniforms = $a{uniformMapExps};
+
 					super();
                     data.iTime.value = [0.0];
 					if (camera == null) {
