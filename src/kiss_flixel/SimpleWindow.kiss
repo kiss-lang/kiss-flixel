@@ -450,7 +450,7 @@
 (method _nonUIControls []
     (filter controls.members ->m ?(when (= -1 (.indexOf [xText upText downText titleText scrollBar] (cast m))) m)))
 
-(prop &mut :FlxText titleText)
+(prop &mut :FlxSprite titleText)
 (prop &mut :FlxText leftText)
 (prop &mut :FlxText rightText)
 (prop &mut :Array<FlxText> columnTexts [])
@@ -520,8 +520,14 @@
 (prop :Map<FlxSprite,Action> _onDeselectEvents (new Map))
 (prop :Map<FlxSprite,FlxColor> _colors (new Map))
 (prop &mut :Bool selectFirstInteractiveControl true)
-(method makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut]
-    (let [ftext (new FlxText nextControlX nextControlY 0 text textSize)]
+(method makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut :FlxColor bgColor :Int margin]
+    (let [:FlxSprite ftext
+                (if bgColor
+                        (let [p (SpriteTools.textPlate text textSize (or margin 0) color bgColor)]
+                            (set p.x nextControlX)
+                            (set p.y nextControlY)
+                            p)
+                    (new FlxText nextControlX nextControlY 0 text textSize))]
         (set ftext.color (or color textColor))
         (dictSet _colors ftext ftext.color)
         (addControl ftext)
@@ -536,6 +542,7 @@
             (when (and selectFirstInteractiveControl (= -1 _selectedIndex))
                 (set selectedIndex (.indexOf (getColumnControls) ftext))))
         ftext))
+(redefineWithObjectArgs makeText makeTextV2 [text])
 
 (method makeWrappedText [:String _text &opt :FlxColor color :Bool skipScrollingCheck]
     (unless skipScrollingCheck (assert _useScrolling))
@@ -750,20 +757,20 @@
                                             :Bool noShortcuts
                                             :Bool wrapPrompt
                                             :String screenReaderAudioFolder]
-(let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose defaultSelectionMarker screenReaderAudioFolder)
-        choiceColor (or choiceColor titleColor FlxColor.WHITE)]
-    (when wrapPrompt
-        (window.makeWrappedText prompt titleColor true))
-    (doFor choice choices
-        (window.makeText (Std.string choice) choiceColor
-            (when (Std.string choice)
-                ->:Void s {
-                    (window.hide)
-                    (onChoice choice)
-                })
-            noShortcuts))
-    (window.show)
-    window))
+    (let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose defaultSelectionMarker screenReaderAudioFolder)
+            choiceColor (or choiceColor titleColor FlxColor.WHITE)]
+        (when wrapPrompt
+            (window.makeWrappedText prompt titleColor true))
+        (doFor choice choices
+            (window.makeText (Std.string choice) choiceColor
+                (when (Std.string choice)
+                    ->:Void s {
+                        (window.hide)
+                        (onChoice choice)
+                    })
+                noShortcuts))
+        (window.show)
+        window))
 
 (redefineWithObjectArgs promptForChoice promptForChoiceV2 [prompt choices onChoice])
 
@@ -783,19 +790,55 @@
                                         :String enterKey
                                         :ShortcutAction onClose
                                         :Bool wrapPrompt]
-(let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
-        buttonColor (or submitColor FlxColor.WHITE)
-        inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
-    (when wrapPrompt
-        (window.makeWrappedText prompt titleColor true))
-    (window.addControl inputText)
-    (window.makeText "{enter} Submit" buttonColor
-            ->:Void s {
-                (window.hide)
-                (onChoice inputText.text)
-            })
+    (let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose)
+            buttonColor (or submitColor FlxColor.WHITE)
+            inputText (new KissInputText 0 0 FlxG.width "" textSize true)]
+        (when wrapPrompt
+            (window.makeWrappedText prompt titleColor true))
+        (window.addControl inputText)
+        (window.makeText "{enter} Submit" buttonColor
+                ->:Void s {
+                    (window.hide)
+                    (onChoice inputText.text)
+                })
+            (window.show)
+            window))
+(redefineWithObjectArgs promptForString promptForStringV2 [prompt onChoice])
+
+(function :SimpleWindow promptForColor <>[T] [:String prompt
+                                            :Array<FlxColor> choices
+                                            :FlxColor->Void onChoice
+                                            &opt :FlxColor bgColor
+                                            :FlxColor titleColor
+                                            :Float percentWidth
+                                            :Float percentHeight
+                                            :Bool xButton
+                                            :String xKey
+                                            :String leftKey
+                                            :String rightKey
+                                            :String upKey
+                                            :String downKey
+                                            :String enterKey
+                                            :ShortcutAction onClose
+                                            :Bool noShortcuts
+                                            :Bool wrapPrompt
+                                            :String screenReaderAudioFolder]
+    (let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose defaultSelectionMarker screenReaderAudioFolder)]
+        (when wrapPrompt
+            (window.makeWrappedText prompt titleColor true))
+        (doFor choice choices
+            (window.makeTextV2
+                "      "
+                (object
+                    bgColor choice
+                    onClick ->:Void s {
+                        (window.hide)
+                        (onChoice choice)
+                    }
+                    noShortcut noShortcuts)))
         (window.show)
         window))
+(redefineWithObjectArgs promptForColor promptForColorV2 [prompt choices onChoice])
 
 (method scrollLeft []
     (when (> cameraColumn 0)
