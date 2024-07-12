@@ -1,0 +1,8 @@
+(defNew [&prop :FlxPoint value])
+
+(method stringify [] "${value.x},${value.y}")
+(method parse [:String data]
+    (let [components (data.split ",")]
+        (new JsonFlxPoint (FlxPoint.get
+                                    (Std.parseFloat (first components))
+                                    (Std.parseFloat (second components))))))
