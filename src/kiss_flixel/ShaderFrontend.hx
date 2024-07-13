@@ -59,7 +59,7 @@ class ShaderFrontend implements FrontendPlugin {
 		return if (step == null) {
 			macro kiss_flixel.shaders.Uniform.FloatRange($v{min}, $v{max});
 		} else {
-			macro kiss_flixel.Uniform.FloatRangeStep($v{min}, $v{max}, $v{step});
+			macro kiss_flixel.shaders.Uniform.FloatRangeStep($v{min}, $v{max}, $v{step});
 		};
 	}
 
