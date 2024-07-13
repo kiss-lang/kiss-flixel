@@ -325,7 +325,10 @@ class ShaderFrontend implements FrontendPlugin {
 								args: [],
 								expr: macro {
 									var components = this.data.$name.value;
-									return flixel.math.FlxPoint.get(components[0], components[1]);
+									return if (components == null || components.length == 0)
+										null;
+									else
+										flixel.math.FlxPoint.get(components[0], components[1]);
 								}
 							})
 						});
