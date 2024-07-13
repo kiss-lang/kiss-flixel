@@ -806,9 +806,10 @@
 (redefineWithObjectArgs promptForString promptForStringV2 [prompt onChoice])
 
 (function :SimpleWindow promptForColor <>[T] [:String prompt
-                                            :Array<FlxColor> choices
                                             :FlxColor->Void onChoice
-                                            &opt :FlxColor bgColor
+                                            &opt :Array<FlxColor> choices
+                                            :FlxColor currentColor
+                                            :FlxColor bgColor
                                             :FlxColor titleColor
                                             :Float percentWidth
                                             :Float percentHeight
@@ -826,19 +827,39 @@
     (let [window (new SimpleWindow (unless wrapPrompt prompt) bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose defaultSelectionMarker screenReaderAudioFolder)]
         (when wrapPrompt
             (window.makeWrappedText prompt titleColor true))
-        (doFor choice choices
-            (window.makeTextV2
-                "      "
+        (unless choices (set choices (collect FlxColor.colorLookup)))
+        (unless currentColor (set currentColor (first choices)))
+        (localFunction recursiveCall [:FlxColor newCurrentColor]
+            (window.hide)
+            (promptForColor prompt onChoice choices newCurrentColor bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose noShortcuts wrapPrompt screenReaderAudioFolder))
+        (window.makeTextV2
+                "         "
                 (object
-                    bgColor choice
+                    bgColor currentColor
                     onClick ->:Void s {
                         (window.hide)
-                        (onChoice choice)
+                        (onChoice currentColor)
                     }
+                    noShortcut noShortcuts))
+        (var COLOR_STEP 0.1)
+        (window.makeTextV2 "Lighter" (object onClick ->:Void s (recursiveCall (currentColor.getLightened COLOR_STEP))))
+        (window.makeTextV2 "Darker" (object onClick ->:Void s (recursiveCall (currentColor.getDarkened COLOR_STEP))))
+        (window.makeTextV2 "Red++" (object onClick ->:Void s (recursiveCall {(+= currentColor.redFloat COLOR_STEP) currentColor})))
+        (window.makeTextV2 "Red--" (object onClick ->:Void s (recursiveCall {(-= currentColor.redFloat COLOR_STEP) currentColor})))
+        (window.makeTextV2 "Green++" (object onClick ->:Void s (recursiveCall {(+= currentColor.greenFloat COLOR_STEP) currentColor})))
+        (window.makeTextV2 "Green--" (object onClick ->:Void s (recursiveCall {(-= currentColor.greenFloat COLOR_STEP) currentColor})))
+        (window.makeTextV2 "Blue++" (object onClick ->:Void s (recursiveCall {(+= currentColor.blueFloat COLOR_STEP) currentColor})))
+        (window.makeTextV2 "Blue--" (object onClick ->:Void s (recursiveCall {(-= currentColor.blueFloat COLOR_STEP) currentColor})))
+        (doFor choice choices
+            (window.makeTextV2
+                "         "
+                (object
+                    bgColor choice
+                    onClick ->:Void s (recursiveCall choice)
                     noShortcut noShortcuts)))
         (window.show)
         window))
-(redefineWithObjectArgs promptForColor promptForColorV2 [prompt choices onChoice])
+(redefineWithObjectArgs promptForColor promptForColorV2 [prompt onChoice])
 
 (method scrollLeft []
     (when (> cameraColumn 0)

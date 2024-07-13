@@ -26,19 +26,19 @@
 (method &override :Void update [:Float elapsed]
     (super.update elapsed)
     (when FlxG.keys.justPressed.A
-        (SimpleWindow.promptForColor "Choose color A" (collect FlxColor.colorLookup)
+        (SimpleWindow.promptForColor "Choose color A"
             ->color
                 (set shader.color_aFlxColor color)))
     (when FlxG.keys.justPressed.B
-        (SimpleWindow.promptForColor "Choose color B" (collect FlxColor.colorLookup)
+        (SimpleWindow.promptForColor "Choose color B"
             ->color
                 (set shader.color_bFlxColor color)))
     (when FlxG.keys.justPressed.C
-        (SimpleWindow.promptForColor "Choose color C" (collect FlxColor.colorLookup)
+        (SimpleWindow.promptForColor "Choose color C"
             ->color
                 (set shader.color_cFlxColor color)))
     (when FlxG.keys.justPressed.D
-        (SimpleWindow.promptForColor "Choose color D" (collect FlxColor.colorLookup)
+        (SimpleWindow.promptForColor "Choose color D"
             ->color
                 (set shader.color_dFlxColor color)))
     (+= FlxG.camera.zoom 0.01))
