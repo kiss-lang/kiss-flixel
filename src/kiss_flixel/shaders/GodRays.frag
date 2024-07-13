@@ -4,7 +4,7 @@
 // by pend00 (CC0)
 // Ported to kiss-flixel by NQNStudios
 
-uniform float angle = -0.3;
+uniform float angle : hint_range(0, 2 * PI, 2 * PI / 60) = -0.3;
 uniform float position = -0.2;
 uniform float spread : hint_range(0.0, 1.0) = 0.5;
 uniform float cutoff : hint_range(-1.0, 1.0) = 0.1;

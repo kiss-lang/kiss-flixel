@@ -19,6 +19,8 @@ class ShaderFrontend implements FrontendPlugin {
 	static var hInterp = new Interp();
 
 	public function new() {
+		hInterp.variables["PI"] = 3.1415926535897932384626433832795;
+
 		function vec2(x, ?y) {
 			if (y == null) {
 				y = x;
