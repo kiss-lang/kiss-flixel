@@ -32,7 +32,7 @@
     (set sprite.cameras [fgCamera])
     (add sprite)
 
-    (set shader (new kiss_flixel.shaders.Shadow))
+    (set shader (new kiss_flixel.shaders.Shadow "shadow.json"))
     (kiss_flixel.CameraTools.addShaderFilter fgCamera (array FlxShader shader)))
 
 (method &override :Void update [:Float elapsed]

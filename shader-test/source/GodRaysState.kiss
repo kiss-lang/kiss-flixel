@@ -15,7 +15,7 @@
 
 (method &override :Void create []
     (super.create)
-    (set shader (new kiss_flixel.shaders.GodRays))
+    (set shader (new kiss_flixel.shaders.GodRays "godRays.json"))
     (set sprite (new FlxSprite 0 0 "assets/images/flymanEdited.png"))
     (add sprite)
 

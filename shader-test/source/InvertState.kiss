@@ -17,7 +17,7 @@
         (bg.screenCenter)
         (set bg.alpha 0.5)
         (add bg))
-    (set shader (new kiss_flixel.shaders.Invert))
+    (set shader (new kiss_flixel.shaders.Invert "invert.json"))
     (kiss_flixel.CameraTools.addShaderFilter FlxG.camera (array FlxShader shader)))
 
 (method &override :Void update [:Float elapsed]
