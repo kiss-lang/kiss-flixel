@@ -343,7 +343,11 @@ class ShaderFrontend implements FrontendPlugin {
 								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.ColorSolid});
 							}
 						} else {
-							uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.Vector3});
+							if (withAlpha) {
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.Vector4});
+							} else {
+								uniformMapExps.push(macro $v{propName} => ${macro kiss_flixel.shaders.Uniform.Vector3});
+							}
 						}
 
 						var _type = "flixel.util.FlxColor";

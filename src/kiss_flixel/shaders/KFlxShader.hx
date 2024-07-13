@@ -48,7 +48,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                         case Vector2:
                             Reflect.setProperty(this, name, new JsonFlxPoint(flixel.math.FlxPoint.get()).parse(json.get(name).value).value);
                         // TODO
-                        case Vector3:
+                        case Vector3 | Vector4:
                             trace('Warning! Shader uniform $name of type $uniform is not handled in kiss-flixel json');
                     }
                 }
