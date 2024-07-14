@@ -832,7 +832,7 @@
         (unless currentColor (set currentColor (first choices)))
         (localFunction recursiveCall [:FlxColor newCurrentColor]
             (window.hide)
-            (promptForColor prompt onChoice choices newCurrentColor bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose noShortcuts wrapPrompt screenReaderAudioFolder))
+            (promptForColor prompt onChoice choices newCurrentColor allowAlpha bgColor titleColor percentWidth percentHeight xButton xKey leftKey rightKey upKey downKey enterKey onClose noShortcuts wrapPrompt screenReaderAudioFolder))
         (window.makeTextV2
                 "         "
                 (object
