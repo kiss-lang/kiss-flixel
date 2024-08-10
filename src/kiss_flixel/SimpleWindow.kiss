@@ -450,7 +450,13 @@
 (method _nonUIControls []
     (filter controls.members ->m ?(when (= -1 (.indexOf [xText upText downText titleText scrollBar] (cast m))) m)))
 
+// titleText is sometimes not a FlxText
 (prop &mut :FlxSprite titleText)
+(method setTitleText [:String text]
+    (typeCase [titleText]
+        ([:FlxText ttext]
+            (set ttext.text text))
+        (otherwise (throw "titleText is not a FlxText!"))))
 (prop &mut :FlxText leftText)
 (prop &mut :FlxText rightText)
 (prop &mut :Array<FlxText> columnTexts [])
