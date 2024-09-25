@@ -117,7 +117,7 @@
         (camera.setFilters filters)))
 
 (var :Map<FlxCamera,FlxColor> cameraBgColors (new Map))
-(function addBackgroundShaders [:Array<FlxShader> shaders]
+(function :FlxCamera addBackgroundShaders [:Array<FlxShader> shaders]
     (let [:flixel.FlxCamera camera (new flixel.FlxCamera)
             cameras (FlxG.cameras.list.copy)
             defaults (.copy (Reflect.field FlxG.cameras "defaults"))]
@@ -129,11 +129,14 @@
             (FlxG.cameras.remove _camera false))
         (FlxG.cameras.add camera false)
         (doFor _camera cameras
-            (FlxG.cameras.add _camera (defaults.contains _camera)))))
+            (FlxG.cameras.add _camera (defaults.contains _camera)))
+        // Return the new background camera:
+        camera))
 
 (function removeBackgroundShaders []
     (let [cameras (FlxG.cameras.list.copy)]
         // Destroy the background filter camera
+        // NOTE this implementation means there can only be one
         (FlxG.cameras.remove (cameras.shift) true)
         (doFor _camera cameras
             (set _camera.bgColor (dictGet cameraBgColors _camera))
