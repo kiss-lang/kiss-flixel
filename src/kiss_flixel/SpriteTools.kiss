@@ -86,6 +86,7 @@
 (var &mut _idx 0)
 (var &mut doPrint true)
 (var :Map<flixel.FlxBasic,Bool> ignoreObjects (new Map))
+(var :Map<flixel.FlxCamera,Bool> ignoreCameras (new Map))
 (function :String logSprites [&opt :flixel.FlxCamera _camera :FlxGroup group :String tab :StringBuf buf]
     (unless buf
         (set buf (new StringBuf)))
@@ -98,10 +99,11 @@
         (_print "###############")
         (let [cameras (enumerate (filter FlxG.cameras.list))]
             (doFor [idx camera] cameras
-                (_print "Camera #${idx} (${camera.x}, ${camera.y}, ${camera.width}x${camera.height})")
-                (_print "bgColor: ${camera.bgColor}")
-                (_print "--------------")
-                (logSprites camera null "" buf))
+                (unless (ignoreCameras.exists camera)
+                    (_print "Camera #${idx} (${camera.x}, ${camera.y}, ${camera.width}x${camera.height})")
+                    (_print "bgColor: ${camera.bgColor}")
+                    (_print "--------------")
+                    (logSprites camera null "" buf)))
             (return (buf.toString))))
     (unless group
         (set _idx 0)
