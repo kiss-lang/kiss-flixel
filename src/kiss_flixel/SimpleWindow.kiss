@@ -716,7 +716,7 @@
                     (when FlxG.mouse.justPressed
                         (inputTexts.forEach ->text (set text.hasFocus false))))))))
 
-(function :SimpleWindow notify [:String message
+(function &private :SimpleWindow notify [:String message
                                     :Void->Void onDismiss
                                     &opt :FlxColor bgColor
                                     :FlxColor titleColor
@@ -747,6 +747,8 @@
         false
         true
         screenReaderAudioFolder))
+
+(redefineWithObjectArgs notify &public notifyV2 [message onDismiss])
 
 (function &private :SimpleWindow promptForChoice <>[T] [:String prompt
                                             :Array<T> choices
