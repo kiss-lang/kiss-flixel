@@ -127,7 +127,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     var v:Int = Reflect.getProperty(this, key);
                     window.makeTextV2('${key}: ${v}', {
                         onClick: s -> {
-                            SimpleWindow.promptForChoice('Change from $v to:', [for (i in min... max+1) i], int -> {
+                            SimpleWindow.promptForChoiceV2('Change from $v to:', [for (i in min... max+1) i], int -> {
                                 Reflect.setProperty(this, key, int);
                                 recursiveCall();
                             });
@@ -137,7 +137,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     var v:Int = Reflect.getProperty(this, key);
                     window.makeTextV2('${key}: ${v}', {
                         onClick: s -> {
-                            SimpleWindow.promptForChoice('Change from $v to:', [for (i in kiss.Prelude.range(min, max+1, step)) i], int -> {
+                            SimpleWindow.promptForChoiceV2('Change from $v to:', [for (i in kiss.Prelude.range(min, max+1, step)) i], int -> {
                                 Reflect.setProperty(this, key, int);
                                 recursiveCall();
                             });
@@ -175,7 +175,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                                 choices.push(next);
                                 next += step;
                             }
-                            SimpleWindow.promptForChoice('Change from $v to:', choices, float -> {
+                            SimpleWindow.promptForChoiceV2('Change from $v to:', choices, float -> {
                                 Reflect.setProperty(this, key, float);
                                 recursiveCall();
                             });

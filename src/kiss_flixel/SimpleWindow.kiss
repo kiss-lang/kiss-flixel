@@ -152,7 +152,7 @@
     (new SimpleWindow args.title args.bgColor args.textColor args.percentWidth args.percentHeight args.xButton args.xKey
             args.leftKey args.rightKey args.upKey args.downKey args.enterKey args.onClose args.selectionMarker args.screenReaderAudioFolder))
 
-(defNew [&opt :String _title 
+(defNew &private [&opt :String _title
             :FlxColor bgColor
             :FlxColor _textColor
             :Float percentWidth
@@ -530,7 +530,7 @@
 (prop :Map<FlxSprite,Action> _onDeselectEvents (new Map))
 (prop :Map<FlxSprite,FlxColor> _colors (new Map))
 (prop &mut :Bool selectFirstInteractiveControl true)
-(method makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut :FlxColor bgColor :Int margin]
+(method &private makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut :FlxColor bgColor :Int margin]
     (let [:FlxSprite ftext
                 (if bgColor
                         (let [p (SpriteTools.textPlate text textSize (or margin 0) color bgColor)]
@@ -552,7 +552,7 @@
             (when (and selectFirstInteractiveControl (= -1 _selectedIndex))
                 (set selectedIndex (.indexOf (getColumnControls) ftext))))
         ftext))
-(redefineWithObjectArgs makeText makeTextV2 [text])
+(redefineWithObjectArgs makeText &public makeTextV2 [text])
 
 (method makeWrappedText [:String _text &opt :FlxColor color :Bool skipScrollingCheck]
     (unless skipScrollingCheck (assert _useScrolling))
@@ -748,7 +748,7 @@
         true
         screenReaderAudioFolder))
 
-(function :SimpleWindow promptForChoice <>[T] [:String prompt
+(function &private :SimpleWindow promptForChoice <>[T] [:String prompt
                                             :Array<T> choices
                                             :T->Void onChoice
                                             &opt :FlxColor bgColor
@@ -782,9 +782,9 @@
         (window.show)
         window))
 
-(redefineWithObjectArgs promptForChoice promptForChoiceV2 [prompt choices onChoice])
+(redefineWithObjectArgs promptForChoice &public promptForChoiceV2 [prompt choices onChoice])
 
-(function :SimpleWindow promptForString [:String prompt
+(function &private :SimpleWindow promptForString [:String prompt
                                         :String->Void onChoice
                                         &opt :FlxColor bgColor
                                         :FlxColor titleColor
@@ -813,9 +813,9 @@
                 })
             (window.show)
             window))
-(redefineWithObjectArgs promptForString promptForStringV2 [prompt onChoice])
+(redefineWithObjectArgs promptForString &public promptForStringV2 [prompt onChoice])
 
-(function :SimpleWindow promptForColor <>[T] [:String prompt
+(function &private :SimpleWindow promptForColor <>[T] [:String prompt
                                             :FlxColor->Void onChoice
                                             &opt :Array<FlxColor> choices
                                             :FlxColor currentColor
@@ -873,7 +873,7 @@
                     noShortcut noShortcuts)))
         (window.show)
         window))
-(redefineWithObjectArgs promptForColor promptForColorV2 [prompt onChoice])
+(redefineWithObjectArgs promptForColor &public promptForColorV2 [prompt onChoice])
 
 (method scrollLeft []
     (when (> cameraColumn 0)
