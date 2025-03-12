@@ -148,6 +148,10 @@
     (set SimpleWindow.defaultDownKey "down")
     (set SimpleWindow.defaultEnterKey "enter"))
 
+(function create [:ConstructorArgs args]
+    (new SimpleWindow args.title args.bgColor args.textColor args.percentWidth args.percentHeight args.xButton args.xKey
+            args.leftKey args.rightKey args.upKey args.downKey args.enterKey args.onClose args.selectionMarker args.screenReaderAudioFolder))
+
 (defNew [&opt :String _title 
             :FlxColor bgColor
             :FlxColor _textColor

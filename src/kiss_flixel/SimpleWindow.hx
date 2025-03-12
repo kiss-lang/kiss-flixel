@@ -26,6 +26,23 @@ using StringTools;
 
 typedef ShortcutAction = Void->Void;
 typedef Action = FlxSprite->Void;
+typedef ConstructorArgs = {
+	?title:String,
+	?bgColor:FlxColor,
+	?textColor:FlxColor,
+	?percentWidth:Float,
+	?percentHeight:Float,
+	?xButton:Bool,
+	?xKey:String,
+	?leftKey:String,
+	?rightKey:String,
+	?upKey:String,
+	?downKey:String,
+	?enterKey:String,
+	?onClose:ShortcutAction,
+	?selectionMarker:FlxSprite,
+	?screenReaderAudioFolder:String
+};
 
 @:build(kiss.Kiss.build())
 class SimpleWindow extends FlxSprite {}
