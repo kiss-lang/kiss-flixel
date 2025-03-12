@@ -14,8 +14,8 @@ void main()
     float row = floor(position.y / checkSize);
     float col = floor(position.x / checkSize);
 
-    bool oddRow = mod(row, 2) == 1;
-    bool oddCol = mod(col, 2) == 1;
+    bool oddRow = mod(row, 2.0) == 1.0;
+    bool oddCol = mod(col, 2.0) == 1.0;
 
     vec4 oddColor = oddRow ? color1 : color2;
     vec4 evenColor = oddRow ? color2 : color1;

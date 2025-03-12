@@ -97,8 +97,6 @@ class ShaderFrontend implements FrontendPlugin {
 		transformedCode += 'uniform vec2 cameraPos;\n';
 		transformedCode += 'uniform float cameraZoom;\n';
 
-		// TODO Implement round for the targets that weirdly don't have it
-
 		// give uniforms their default values
 		var defaultSetterExps = [];
 		var uniformMapExps = [];
