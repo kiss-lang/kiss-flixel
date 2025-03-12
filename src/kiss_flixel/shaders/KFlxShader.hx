@@ -95,7 +95,12 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
     }
 
     function editShaderUniforms() {
-        var window = new SimpleWindow('Editing shader uniforms: ${json.jsonPath}', null, null, 0.9, 0.9, true);
+        var window = SimpleWindow.create({
+            title: 'Editing shader uniforms: ${json.jsonPath}',
+            percentWidth: 0.9,
+            percentHeight: 0.9, 
+            xButton: true
+        });
         
         function recursiveCall() {
             window.show();
