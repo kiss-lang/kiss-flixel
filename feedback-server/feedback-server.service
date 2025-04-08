@@ -1,0 +1,13 @@
+[Unit]
+Description=An ExpressJS website made with Kisslang
+
+[Service]
+Environment="HOME=/root"
+WorkingDirectory=/root/kiss-flixel/feedback-server
+ExecStart=/usr/bin/haxe build.hxml
+Type=simple
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=basic.target
