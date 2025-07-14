@@ -1,4 +1,4 @@
-(function updateKeyControl [:FlxCamera camera :Float elapsed :Float speed :Void->Bool leftKey :Void->Bool rightKey :Void->Bool upKey :Void->Bool downKey]
+(function :Void updateKeyControl [:FlxCamera camera :Float elapsed :Float speed :Void->Bool leftKey :Void->Bool rightKey :Void->Bool upKey :Void->Bool downKey]
     (let [scrollAmount (* speed elapsed)
             &mut :FlxVector movement (new FlxPoint)]
         (when (leftKey) (-= movement.x 1))
@@ -51,7 +51,7 @@
         (-= camera.height dy (* border.scale.y borderSizeBottom)))))
 
 // GOTCHA: if you change FlxG.camera to a moving camera, you MUST provide a default camera for FlxG.mouse.getScreenPosition()
-(function updateMouseBorderControl [:FlxCamera camera :Float elapsed :Float speed :Float heightFraction :FlxCamera screenCamera]
+(function :Void updateMouseBorderControl [:FlxCamera camera :Float elapsed :Float speed :Float heightFraction :FlxCamera screenCamera]
     (let [viewport (ifLet [bc (dictGet borderCameras camera)] bc camera)
             left viewport.x
             top viewport.y
@@ -61,6 +61,11 @@
             // (in a landscape view, this just makes more sense to me)
             margin (* viewport.height heightFraction)
             mPos (FlxG.mouse.getScreenPosition screenCamera)]
+        // Very annoyingly, I can't find a better way to make sure being off the window doesn't keep scrolling the camera.
+        (unless FlxG.fullscreen
+            (when (or (= mPos.x 0) (= mPos.x (- FlxG.width 1))
+                    (= mPos.y 0) (= mPos.y (- FlxG.height 1)))
+                (return)))
         (updateKeyControl camera elapsed speed
             // when the camera takes the whole screen, count the letterbox zones as margin
             ->(if (= left 0)
