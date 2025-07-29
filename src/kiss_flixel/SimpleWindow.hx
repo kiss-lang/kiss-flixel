@@ -11,6 +11,7 @@ import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.sound.FlxSound;
 import flixel.math.FlxRect;
+import flixel.math.FlxPoint;
 import flixel.group.FlxGroup;
 import kiss_flixel.FlxKeyShortcutHandler;
 import flixel.input.actions.FlxAction;
@@ -20,6 +21,7 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.mouse.FlxMouseEvent;
 import kiss_flixel.KissExtendedSprite;
 import flixel.addons.plugin.FlxMouseControl;
+import hx.strings.Strings;
 
 using haxe.io.Path;
 using StringTools;

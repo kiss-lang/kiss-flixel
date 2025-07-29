@@ -38,6 +38,13 @@
             	(object
                     onClick
                         ->_ (print "$letter clicked")
+                    tooltipText
+                        "letter $letter"
+                    altActions
+                        [
+                            =>"1 alt option 1" ->_ (print "alt option 1 clicked for $letter")
+                            =>"2 alt option 2" ->_ (print "alt option 2 clicked for $letter")
+                        ]
                     onSelect
                         ->_ (print "$letter selected")
                     onDeselect

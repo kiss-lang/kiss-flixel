@@ -160,7 +160,7 @@
             args.leftKey args.rightKey args.upKey args.downKey args.enterKey args.onClose args.selectionMarker args.screenReaderAudioFolder))
 
 (defNew &private [&opt :String _title
-            :FlxColor bgColor
+            :FlxColor _bgColor
             :FlxColor _textColor
             :Float percentWidth
             :Float percentHeight
@@ -178,6 +178,7 @@
         &mut :Int controlsPerColumn 0
         :FlxColor titleColor (or _textColor FlxColor.WHITE)
         &mut :FlxColor textColor (or _textColor FlxColor.WHITE)
+        :FlxColor bgColor (or _bgColor FlxColor.BLACK)
         :Bool xButton ?_xButton
         :String xKey (or _xKey defaultXKey)
         :String leftKey (or _leftKey defaultLeftKey)
@@ -210,7 +211,7 @@
     (makeGraphic
         _width
         _height
-        (or bgColor FlxColor.BLACK)
+        bgColor
         true)
     (flixel.util.FlxSpriteUtil.drawRect this 0 0 _width _height FlxColor.TRANSPARENT (object color textColor))
     (screenCenter)
@@ -535,9 +536,11 @@
 (prop :Map<FlxSprite,Action> _actions (new Map))
 (prop :Map<FlxSprite,Action> _onSelectEvents (new Map))
 (prop :Map<FlxSprite,Action> _onDeselectEvents (new Map))
+(prop :Map<FlxSprite,Map<String,Action>> _altActions (new Map))
+(prop :Map<FlxSprite,String> _tooltips (new Map))
 (prop :Map<FlxSprite,FlxColor> _colors (new Map))
 (prop &mut :Bool selectFirstInteractiveControl true)
-(method &private makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut :FlxColor bgColor :Int margin]
+(method &private makeText [:String text &opt :FlxColor color :Action onClick :Action onSelect :Action onDeselect :Bool noShortcut :FlxColor bgColor :Int margin :String tooltipText :Map<String,Action> altActions]
     (let [:FlxSprite ftext
                 (if bgColor
                         (let [p (SpriteTools.textPlate text textSize (or margin 0) color bgColor)]
@@ -558,6 +561,10 @@
                 (keyHandler.registerItem text ->:Void (onClick ftext)))
             (when (and selectFirstInteractiveControl (= -1 _selectedIndex))
                 (set selectedIndex (.indexOf (getColumnControls) ftext))))
+        (when altActions
+            (dictSet _altActions ftext altActions))
+        (when tooltipText
+            (dictSet _tooltips ftext tooltipText))
         ftext))
 (redefineWithObjectArgs makeText &public makeTextV2 [text])
 
@@ -695,17 +702,26 @@
             (let [mousePos (FlxG.mouse.getScreenPosition controlCamera)]
                 // Click and hover on clickable text entries
                 (controls.forEach ->text
-                    (whenLet [onClick (dictGet _actions text)]
-                                    (let [color (dictGet _colors text)]
-                                        (if (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
-                                                {
-                                                    (when FlxG.mouse.justPressed
-                                                        (onClick text))
-                                                    (set otherIsSelected true)
-                                                    (set text.color (getHighlighted (dictGet _colors text)))
-                                                    (set selectedIndex (columnControls.indexOf text))
-                                                }
-                                            (set text.color (dictGet _colors text))))))
+                	(let [onClick (dictGet _actions text)
+                            :Map<String,Action> altActions (or (dictGet _altActions text) (new Map<String,Action>))
+                            &mut tooltipText (dictGet _tooltips text)]
+                        (when (or onClick (< 0 (count altActions)) tooltipText)
+                            (let [color (dictGet _colors text)]
+                                (if (and !otherIsSelected (.containsPoint (text.getScreenBounds controlCamera) mousePos))
+                                        {
+                                            (cond
+                                                ((and FlxG.mouse.justPressed onClick)
+                                                    (onClick text))
+                                                ((and FlxG.mouse.justPressedRight (< 0 (count altActions)))
+                                                    (showRightClickMenu text altActions))
+                                                (tooltipText
+                                                    (showTooltipText text tooltipText altActions)))
+                                            
+                                            (set otherIsSelected true)
+                                            (set text.color (getHighlighted (dictGet _colors text)))
+                                            (set selectedIndex (columnControls.indexOf text))
+                                        }
+                                    (set text.color (dictGet _colors text)))))))
                 // Click on text boxes to focus them
                 (inputTexts.forEach ->text
                     (when FlxG.mouse.justPressed
@@ -719,6 +735,7 @@
                         (set scrollBar.color (dictGet _colors scrollBar))))
                 (unless otherIsSelected 
                     (set selectedIndex -1)
+                    (hideTooltipText)
                     // Click anywhere else to take focus away from text boxes
                     (when FlxG.mouse.justPressed
                         (inputTexts.forEach ->text (set text.hasFocus false))))))))
@@ -948,3 +965,93 @@
     (when otherKeyMappings
         (keyHandler.enableGamepadInput otherKeyMappings gamepadId))
     this)
+
+(var &mut :String lastTooltipText "")
+(var &mut :FlxSprite tooltipSprite null)
+(var :FlxPoint tempPoint (new FlxPoint))
+
+(method :Void showTooltipText [:FlxSprite control :String text :Map<String,Action> altActions]
+	(let [numAltActions (count altActions)
+            mousePos (FlxG.mouse.getWorldPosition controlCamera tempPoint)
+            widthAllowed (- FlxG.width mousePos.x)]
+    	
+        // With alt actions, append the number of them to the tooltip
+        (when (< 0 numAltActions)
+            (when text
+                (+= text "\n\n"))
+            (+= text "RMB: $numAltActions more option")
+            (when (< 1 numAltActions)
+                (+= text "s")))
+    
+        (if (= text lastTooltipText)
+                // Tooltip sprite already exists, just move it
+                {
+                    (set tooltipSprite.x mousePos.x)
+                    (set tooltipSprite.y mousePos.y)
+                }
+            {
+                (when tooltipSprite
+                    (tooltipSprite.kill)
+                    (tooltipSprite.destroy))
+                (set tooltipSprite (SpriteTools.textPlateV2 text textSize (/ textSize 2) (objectWith [width (- width control.x)] textColor bgColor)))
+                    (set tooltipSprite.x mousePos.x)
+                    (set tooltipSprite.y mousePos.y)
+                (flixel.util.FlxSpriteUtil.drawRect tooltipSprite 0 0 tooltipSprite.width tooltipSprite.height FlxColor.TRANSPARENT (object color textColor))
+                (set lastTooltipText text)
+            })
+        (set tooltipSprite.cameras [controlCamera])
+        (FlxG.state.add tooltipSprite)))
+
+(method :Void hideTooltipText []
+    (set lastTooltipText "")
+    (when tooltipSprite
+        (FlxG.state.remove tooltipSprite true)
+        (tooltipSprite.destroy)))
+
+(method :Void moveTo [:FlxPoint position]
+    (set x position.x)
+    (set y position.y)
+    (set controlCamera.x (+ camera.x position.x))
+    (set controlCamera.y (+ camera.y position.y)))
+
+(method :Void resize [:Int width :Int height]
+    (makeGraphic
+        width
+        height
+        bgColor
+        true)
+    (flixel.util.FlxSpriteUtil.drawRect this 0 0 width height FlxColor.TRANSPARENT (object color textColor))
+    (set controlCamera.width width)
+    (set controlCamera.height height)
+    (when xText
+        (set xText.x width)
+        (-= xText.x xText.width)))
+
+(method :Void showRightClickMenu [:FlxSprite control :Map<String,Action> altActions]
+	(hideTooltipText)
+    // alt action keys can start with numbers and be sorted lexicographically,
+    // then the numbers and intervening whitespace will be stripped out
+    (let [sortedKeys (sort (collect (altActions.keys)))]
+        (let [mousePos (FlxG.mouse.getWorldPosition controlCamera tempPoint)
+                keysWithoutNumber
+                    (for key sortedKeys
+                        (let [chars (key.split "")]
+                            (while (Strings.isDigits (first chars))
+                                (chars.shift))
+                            (StringTools.trim (chars.join ""))))
+                keysWithoutNumberMap
+                    (for [keyWithoutNumber key] (zip keysWithoutNumber sortedKeys)
+                        =>keyWithoutNumber key)
+                choiceWindow
+                    (promptForChoiceV2
+                        ""
+                        keysWithoutNumber
+                        ->choice
+                            ((dictGet altActions (dictGet keysWithoutNumberMap choice)) control)
+                        (objectWith [choiceColor textColor xButton true] bgColor))]
+            // set up choiceWindow with position where it should be etc
+            (set choiceWindow.camera controlCamera)
+            (choiceWindow.moveTo mousePos)
+            (choiceWindow.resize
+                (+ (or choiceWindow.selectionMarker?.width 0) (* textSize 2) (or choiceWindow.xText?.width 0) (apply max (for control choiceWindow.controls control.width)))
+                (* (+ 1 sortedKeys.length) textSize)))))
