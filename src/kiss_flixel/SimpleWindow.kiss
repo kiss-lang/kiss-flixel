@@ -5,8 +5,15 @@
 (var :kiss.List<SimpleWindow> windowStack [])
 (var &mut :flixel.FlxCamera defaultCamera null)
 
-(savedVar :Float screenReaderVolume 1.0)
-(savedVar :Bool screenReaderEnabled true)
+(#if sys
+        {
+            (savedVar :Float screenReaderVolume 1.0)
+            (savedVar :Bool screenReaderEnabled true)
+        }
+    {
+        (var :Float screenReaderVolume 0.0)
+        (var :Bool screenReaderEnabled false)
+    })
 
 (prop :FlxCamera controlCamera)
 

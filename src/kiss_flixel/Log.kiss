@@ -20,7 +20,8 @@
 (var &mut logFile "")
 (function use []
     (set Prelude.printStr log)
-    (set logFile (joinPath (Sys.getCwd) "log.txt"))
-    (let [msg "Launching version $(gitVersion) for $(Sys.systemName) on $(.toString (Date.now))"
+    (#when sys
+        (set logFile (joinPath (Sys.getCwd) "log.txt")))
+    (let [msg "Launching version $(gitVersion) for $(#if sys (Sys.systemName) "html5") on $(.toString (Date.now))"
             divider (* msg.length "-")]
         (log "${divider}\n${msg}\n${divider}")))
