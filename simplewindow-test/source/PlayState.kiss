@@ -26,7 +26,8 @@
                     (#when sys
                         (FeedbackWindow.collectFeedback showMenu)))
                 ("Quit"
-                    (Sys.exit 0))
+                	(#when sys
+                        (Sys.exit 0)))
                 (never otherwise))
         (object screenReaderAudioFolder "assets/screen-reader-audio")))
 
