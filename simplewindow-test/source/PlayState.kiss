@@ -32,7 +32,7 @@
         (object screenReaderAudioFolder "assets/screen-reader-audio")))
 
 (method subMenu []
-    (let [window (new SimpleWindow "SubMenu")]
+    (let [window (SimpleWindow.create (object title "SubMenu"))]
         (doFor letter ["A" "B" "C"]
             (window.makeText letter null
                 ->_ (print "$letter clicked")
@@ -52,7 +52,7 @@
         (window.show)))
 
 (method verticalMenu []
-    (let [window (new SimpleWindow "Vertical Menu" true)]
+    (let [window (SimpleWindow.create (object title "Vertical Menu" xButton true))]
         (set window.onClose ->:Void {(window.hide)(showMenu)})
         (window.enableVerticalScrolling)
         (doFor num (range 50)
