@@ -23,7 +23,8 @@
                 ("Menu"
                     (subMenu))
                 ("Feedback"
-                    (FeedbackWindow.collectFeedback showMenu))
+                    (#when sys
+                        (FeedbackWindow.collectFeedback showMenu)))
                 ("Quit"
                     (Sys.exit 0))
                 (never otherwise))

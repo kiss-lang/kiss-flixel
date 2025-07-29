@@ -1,5 +1,6 @@
 package kiss_flixel;
 
+#if sys
 import kiss.Prelude;
 import kiss.List;
 import flixel.util.FlxColor;
@@ -11,3 +12,5 @@ import sys.io.File;
 
 @:build(kiss.Kiss.build())
 class FeedbackWindow extends SimpleWindow {}
+
+#end
