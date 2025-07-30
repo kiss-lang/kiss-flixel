@@ -34,17 +34,22 @@
 (method subMenu []
     (let [window (SimpleWindow.create (object title "SubMenu"))]
         (doFor letter ["A" "B" "C"]
-            (window.makeText letter null
-                ->_ (print "$letter clicked")
-                ->_ (print "$letter selected")
-                ->_ (print "$letter deselected")))
+            (window.makeTextV2 letter
+            	(object
+                    onClick
+                        ->_ (print "$letter clicked")
+                    onSelect
+                        ->_ (print "$letter selected")
+                    onDeselect
+                        ->_ (print "$letter deselected"))))
         
-        (window.makeText "{tab} Back" null
-            ->:Void _ 
-                {
-                    (window.hide)
-                    (showMenu)
-                })
+        (window.makeTextV2 "{tab} Back"
+            (object onClick
+                ->:Void _ 
+                    {
+                        (window.hide)
+                        (showMenu)
+                    }))
         (window.enableGamepadInput
             true
             null
@@ -56,7 +61,7 @@
         (set window.onClose ->:Void {(window.hide)(showMenu)})
         (window.enableVerticalScrolling)
         (doFor num (range 50)
-            (window.makeText "$num"))
+            (window.makeTextV2 "$num"))
         (window.enableGamepadInput true)
         (window.show)))
 
