@@ -1,0 +1,11 @@
+(defMacro makeToggleText [window v label on off &opt objArgs]
+	(unless ~objArgs (set objArgs []))
+	`(.makeTextV2 ,window (+ ,label ": " (if ,v ,on ,off))
+		(object
+			onClick ->self
+				(typeCase [self]
+					([:FlxText text]
+						(set ,v (not ,v))
+						(set text.text (+ ,label ": " (if ,v ,on ,off))))
+					(never otherwise))
+			,@objArgs)))
