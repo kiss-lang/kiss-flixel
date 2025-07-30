@@ -74,7 +74,7 @@
                             (flxText.setFormat fontPath size textColor)
                         flxText)
             flxText (applyFormat flxText)
-            textWidth flxText.width
+            textWidth flxText.textField.textWidth
             textHeight flxText.height
             plate (new FlxSprite)]
         (set flxText.color textColor)
