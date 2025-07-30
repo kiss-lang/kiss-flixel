@@ -1,3 +1,5 @@
+(loadFrom "kiss-tools" "src/kiss_tools/RefactorUtil.kiss")
+
 // Calculate where to draw the given stamp sprite on the given canvas sprite, as percentages or pixels from edge
 (function :Array<Int> positionOn [:FlxSprite stamp :FlxSprite canvas :RelativePosition pos &opt :Bool allowOutOfRange]
     (unless pos.anchorX (set pos.anchorX (Percent 0.5)))
@@ -62,11 +64,12 @@
             (set bytes (bitmapData.encode bitmapData.rect (new PNGEncoderOptions true) bytes))
                 (File.saveBytes file bytes))))
 
-(function :FlxSprite textPlate [:String text :Int size :Int margin &opt :FlxColor textColor :FlxColor bgColor :FlxText->FlxText applyFormat :String fontPath]
+(function :FlxSprite textPlate [:String text :Int size :Int margin &opt :FlxColor textColor :FlxColor bgColor :FlxText->FlxText applyFormat :String fontPath :Int width]
     (unless applyFormat (set applyFormat ->text text))
     (unless textColor (set textColor FlxColor.WHITE))
     (unless bgColor (set bgColor FlxColor.BLACK))
-    (let [flxText (new FlxText 0 0 0 text size)
+    (unless width (set width 0))
+    (let [flxText (new FlxText 0 0 width text size)
             flxText (if fontPath
                             (flxText.setFormat fontPath size textColor)
                         flxText)
@@ -78,6 +81,7 @@
         (plate.makeGraphic (+ (* 2 margin) textWidth) (+ (* 2 margin) textHeight) bgColor true)
         (plate.stamp flxText margin margin)
         plate))
+(redefineWithObjectArgs textPlate textPlateV2 [text size margin])
 
 (function :FlxSprite cloneUnique [:FlxSprite sprite]
     (let [s (sprite.clone)]
