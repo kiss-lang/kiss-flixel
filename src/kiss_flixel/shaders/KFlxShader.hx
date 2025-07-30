@@ -122,7 +122,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     var v:Int = Reflect.getProperty(this, key);
                     window.makeTextV2('${key}: ${v}', {
                         onClick: s -> {
-                            SimpleWindow.promptForString('Change from $v to any int:', shouldBeInt -> {
+                            SimpleWindow.promptForStringV2('Change from $v to any int:', shouldBeInt -> {
                                 Reflect.setProperty(this, key, Std.parseInt(shouldBeInt));
                                 recursiveCall();
                             });
@@ -152,7 +152,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     var v:Float = Reflect.getProperty(this, key);
                     window.makeTextV2('${key}: ${v}', {
                         onClick: s -> {
-                            SimpleWindow.promptForString('Change from $v to any float:', shouldBeFloat -> {
+                            SimpleWindow.promptForStringV2('Change from $v to any float:', shouldBeFloat -> {
                                 Reflect.setProperty(this, key, Std.parseFloat(shouldBeFloat));
                                 recursiveCall();
                             });
@@ -162,7 +162,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     var v:Float = Reflect.getProperty(this, key);
                     window.makeTextV2('${key}: ${v}', {
                         onClick: s -> {
-                            SimpleWindow.promptForString('Change from $v to any float between $min and $max:', shouldBeFloat -> {
+                            SimpleWindow.promptForStringV2('Change from $v to any float between $min and $max:', shouldBeFloat -> {
                                 var f = Std.parseFloat(shouldBeFloat);
                                 if (f >= min && f <= max)
                                     Reflect.setProperty(this, key, f);
@@ -188,7 +188,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     });
                 case ColorSolid:
                     var c:FlxColor = Reflect.getProperty(this, key);
-                    window.makeText(key);
+                    window.makeTextV2(key);
                     window.makeTextV2('         ', {
                         bgColor: c,
                         onClick: _ -> {
@@ -202,7 +202,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     });
                 case ColorWithAlpha:
                     var c:FlxColor = Reflect.getProperty(this, key);
-                    window.makeText(key);
+                    window.makeTextV2(key);
                     window.makeTextV2('         ', {
                         bgColor: c,
                         onClick: _ -> {
@@ -219,7 +219,7 @@ class KFlxShader extends flixel.system.FlxAssets.FlxShader {
                     var p:FlxPoint = Reflect.getProperty(this, key);
                     window.makeTextV2('${key}: ${p}', {
                         onClick: _ -> {
-                            SimpleWindow.promptForString('Change from $p to _,_:', str -> {
+                            SimpleWindow.promptForStringV2('Change from $p to _,_:', str -> {
                                 var parts = str.split(",");
                                 Reflect.setProperty(this, key, FlxPoint.get(Std.parseFloat(parts[0]), Std.parseFloat(parts[1])));
                                 recursiveCall();
