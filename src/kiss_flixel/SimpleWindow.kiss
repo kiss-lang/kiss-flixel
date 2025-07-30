@@ -715,7 +715,9 @@
                                                 ((and FlxG.mouse.justPressedRight (< 0 (count altActions)))
                                                     (showRightClickMenu text altActions))
                                                 ((or tooltipText (< 0 (count altActions)))
-                                                    (showTooltipText (or text "") tooltipText altActions)))
+                                                    (showTooltipText text (or tooltipText "") altActions))
+                                                (true
+                                                    (hideTooltipText)))
                                             
                                             (set otherIsSelected true)
                                             (set text.color (getHighlighted (dictGet _colors text)))
