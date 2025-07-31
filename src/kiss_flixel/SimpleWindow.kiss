@@ -651,6 +651,10 @@
         (FlxG.cameras.remove controlCamera false)
         (FlxG.state.remove this true)
         (FlxG.state.remove controls true)
+
+        (hideTooltipText)
+        (when (rightClickMenu?.isShown) (rightClickMenu.hide))
+
         (when selectionMarker
             (FlxG.state.remove selectionMarker true))
         (windowStack.remove this)
@@ -1029,6 +1033,8 @@
         (set xText.x width)
         (-= xText.x xText.width)))
 
+(prop &mut :SimpleWindow rightClickMenu)
+
 (method :Void showRightClickMenu [:FlxSprite control :Map<String,Action> altActions]
 	(hideTooltipText)
     // alt action keys can start with numbers and be sorted lexicographically,
@@ -1051,6 +1057,7 @@
                         ->choice
                             ((dictGet altActions (dictGet keysWithoutNumberMap choice)) control)
                         (objectWith [choiceColor textColor xButton true] bgColor))]
+            (set rightClickMenu choiceWindow)
             // set up choiceWindow with position where it should be etc
             (set choiceWindow.camera controlCamera)
             (choiceWindow.moveTo mousePos)
