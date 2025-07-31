@@ -74,7 +74,6 @@ class ShaderFrontend implements FrontendPlugin {
 
 	public function parse(file:String, context:FrontendContext):Void {
 		var extension = file.withoutDirectory().substr(file.withoutDirectory().indexOf(".") + 1);
-		trace(extension);
 
 		final type = context.getType();
 		var parentClass = 'kiss_flixel.shaders.KFlxShader';
