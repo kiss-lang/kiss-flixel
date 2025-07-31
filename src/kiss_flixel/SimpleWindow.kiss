@@ -1063,4 +1063,4 @@
             (choiceWindow.moveTo mousePos)
             (choiceWindow.resize
                 (+ (or choiceWindow.selectionMarker?.width 0) (* textSize 2) (or choiceWindow.xText?.width 0) (apply max (for control choiceWindow.controls control.width)))
-                (* (+ 1 sortedKeys.length) textSize)))))
+                (Std.int choiceWindow.nextControlY)))))
