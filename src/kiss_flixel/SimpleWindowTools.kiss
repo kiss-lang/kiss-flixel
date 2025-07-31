@@ -1,3 +1,4 @@
+// TODO these evaluate args multiple times. withEvalOnce can't be used, because it strips the type annotations in the typeCase
 (defMacro makeToggleText [window v label on off &opt objArgs]
 	(unless objArgs (set objArgs []))
 	`(.makeTextV2 ,window (+ ,label ": " (if ,v ,on ,off))
@@ -7,5 +8,17 @@
 					([:FlxText text]
 						(set ,v (not ,v))
 						(set text.text (+ ,label ": " (if ,v ,on ,off))))
+					(never otherwise))
+			,@objArgs)))
+
+(defMacro makeCycleText [window idxV label values &opt objArgs]
+	(unless objArgs (set objArgs []))
+	`(.makeTextV2 ,window (+ ,label ": " (nth ,values ,idxV))
+		(object
+			onClick ->self
+				(typeCase [self]
+					([:FlxText text]
+						(set ,idxV (% (+ ,idxV 1) .length ,values))
+						(set text.text (+ ,label ": " (nth ,values ,idxV))))
 					(never otherwise))
 			,@objArgs)))

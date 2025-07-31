@@ -1,3 +1,5 @@
+(loadFrom "kiss-flixel" "src/kiss_flixel/SimpleWindowTools.kiss")
+
 (import flixel.FlxState)
 (import flixel.text.FlxText)
 (import kiss_flixel.Log)
@@ -49,6 +51,10 @@
                         ->_ (print "$letter selected")
                     onDeselect
                         ->_ (print "$letter deselected"))))
+        
+        (prop &mut cycleIdx 0)
+        (prop cycle (for i (range 10) (* i "*")))
+        (makeCycleText window cycleIdx "Counter" cycle)
         
         (window.makeTextV2 "{tab} Back"
             (object onClick
