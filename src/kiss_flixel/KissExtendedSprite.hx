@@ -60,8 +60,15 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
         resetStartPos();
     }
 
+	public var onStopDrag:FlxPoint->Void = null;
+
     public override function stopDrag() {
         super.stopDrag();
+        
+        if(onStopDrag != null){
+            var spriteTotalMovement = new FlxPoint(x - dragStartPos.x, y - dragStartPos.y);
+            onStopDrag(spriteTotalMovement);
+        }
     }
 
     private var rotationPadding = new FlxPoint();
