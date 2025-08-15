@@ -176,8 +176,8 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
         
         if (_snapOnDrag)
 		{
-			x = (Math.floor(x / _snapX) * _snapX);
-			y = (Math.floor(y / _snapY) * _snapY);
+			x = snapOffsetX + (Math.floor(x / _snapX) * _snapX);
+			y = snapOffsetY + (Math.floor(y / _snapY) * _snapY);
 		}
         
         var spriteTotalMovement = new FlxPoint(x - dragStartPos.x, y - dragStartPos.y);
@@ -277,5 +277,15 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
 		}
 		#end
 	}
+
+    var snapOffsetX:Float;
+    var snapOffsetY:Float;
+    override function enableMouseSnap(SnapX:Int, SnapY:Int, OnDrag:Bool = true, OnRelease:Bool = false) {
+        super.enableMouseSnap(SnapX, SnapY, OnDrag, OnRelease);
+        var snappedX = (Math.floor(x / _snapX) * _snapX);
+        snapOffsetX = x - snappedX;
+        var snappedY = (Math.floor(y / _snapY) * _snapY);
+        snapOffsetY = y - snappedY;
+    }
     #end
 }
