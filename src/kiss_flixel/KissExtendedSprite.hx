@@ -48,13 +48,25 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
         mouseStartPos = FlxG.mouse.getWorldPosition();
     }
 
+    public var onStartDrag:Void->Void;
+
     public override function startDrag() {
         super.startDrag();
 
+        // Had a group selected, but started dragging something outside the group: deselect the group
         if (_dragToSelectEnabled) {
             var plugin = FlxG.plugins.get(DragToSelectPlugin); 
             if (plugin.selectedSprites().indexOf(this) == -1)
                 plugin.deselectSprites();
+        }
+
+        if (onStartDrag != null) {
+            onStartDrag();
+        }
+        for(sprite in connectedAndSelectedSprites()) {
+            if(sprite.onStartDrag != null) {
+                sprite.onStartDrag();
+            }
         }
 
         resetStartPos();
