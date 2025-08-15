@@ -173,7 +173,13 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
 		{
 			checkBoundsSprite();
 		}
-
+        
+        if (_snapOnDrag)
+		{
+			x = (Math.floor(x / _snapX) * _snapX);
+			y = (Math.floor(y / _snapY) * _snapY);
+		}
+        
         var spriteTotalMovement = new FlxPoint(x - dragStartPos.x, y - dragStartPos.y);
 
         var l = connectedAndSelectedSprites();
