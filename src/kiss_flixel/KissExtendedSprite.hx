@@ -65,9 +65,14 @@ class KissExtendedSprite extends flixel.addons.display.FlxExtendedSprite {
     public override function stopDrag() {
         super.stopDrag();
         
+        var spriteTotalMovement = new FlxPoint(x - dragStartPos.x, y - dragStartPos.y);
         if(onStopDrag != null){
-            var spriteTotalMovement = new FlxPoint(x - dragStartPos.x, y - dragStartPos.y);
             onStopDrag(spriteTotalMovement);
+        }
+        for(sprite in connectedAndSelectedSprites()) {
+            if(sprite.onStopDrag != null) {
+                sprite.onStopDrag(spriteTotalMovement);
+            }
         }
     }
 
